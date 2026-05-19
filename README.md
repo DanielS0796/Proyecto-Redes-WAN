@@ -45,17 +45,55 @@ Simulador gráfico avanzado orientado al modelado visual de redes empresariales.
 ### Funcionalidades
 
 - Creación visual de topologías
+
+ <img width="1909" height="1025" alt="image" src="https://github.com/user-attachments/assets/b14d14dd-4b28-4093-a4a4-e94631dc429d" />
+ 
 - Simulación interactiva de dispositivos
+
+<img width="1904" height="1030" alt="image" src="https://github.com/user-attachments/assets/a4f26ffd-6d8d-4a7e-a9b6-62910a6b9c21" />
+
+  
 - CLI estilo Cisco IOS
+
+<img width="576" height="906" alt="image" src="https://github.com/user-attachments/assets/fa222d8f-1e03-4fbb-8c42-25cf3370e18d" />
+
+  
 - Routing dinámico
 - OSPF
 - EIGRP
 - BGP
+
+<img width="577" height="905" alt="image" src="https://github.com/user-attachments/assets/44fffe66-5b3d-4ee7-ace1-28641560a20b" />
+
+  
 - Configuración de interfaces
+
+<img width="577" height="910" alt="image" src="https://github.com/user-attachments/assets/40b445bf-f398-4d7a-9907-edfbd90b963e" />
+
+
 - Gestión VLAN
+
+<img width="581" height="908" alt="image" src="https://github.com/user-attachments/assets/08f434d1-48f1-4ed1-9565-648ce6007a1c" />
+
+
 - Exportación SVG
+
+<img width="1909" height="1031" alt="image" src="https://github.com/user-attachments/assets/2a07ece9-28c1-4c72-a9d5-c2021e91681b" />
+
+Archivo SVG 
+
+<img width="1139" height="728" alt="image" src="https://github.com/user-attachments/assets/6e39705c-c7b8-4c71-9e58-ee9d2c23c45f" />
+
+
 - Simulación de tráfico lógico
+
+<img width="1900" height="909" alt="image" src="https://github.com/user-attachments/assets/625266b3-e252-47f0-ada2-d91943c127ff" />
+
+  
 - Administración de sesiones concurrentes
+
+<img width="583" height="569" alt="image" src="https://github.com/user-attachments/assets/27df717e-02e3-456e-9e67-971ff10cc4e5" />
+
 
 ---
 
