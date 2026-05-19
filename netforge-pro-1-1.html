@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NetForge PRO Simulator</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#020609;--surface:#060f18;--card:#091420;--border:#0f2538;
+  --accent:#00d4ff;--accent2:#00ff9d;--accent3:#ff6b35;--warn:#ffa502;
+  --text:#b8d8f0;--muted:#2a5a7a;--danger:#ff4757;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Exo 2',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,255,0.008) 2px,rgba(0,212,255,0.008) 3px);pointer-events:none;z-index:9000;}
+
+/* ── HEADER ── */
+header{height:44px;display:flex;align-items:center;gap:10px;padding:0 12px;background:#020609;border-bottom:1px solid var(--border);flex-shrink:0;z-index:200;}
+.logo{font-family:'Orbitron',monospace;font-size:.9rem;font-weight:900;color:var(--accent);letter-spacing:3px;text-shadow:0 0 12px rgba(0,212,255,.4);}
+.logo b{color:var(--accent2);}
+.hsep{width:1px;height:22px;background:var(--border);}
+.hbtn{padding:4px 10px;background:rgba(255,255,255,.03);border:1px solid var(--border);color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:.62rem;cursor:pointer;border-radius:2px;transition:all .15s;white-space:nowrap;letter-spacing:1px;}
+.hbtn:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.05);}
+.hbtn.on{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.08);}
+.hbtn.red:hover{border-color:var(--danger);color:var(--danger);}
+.ml{margin-left:auto;}
+.hdot{width:6px;height:6px;border-radius:50%;background:var(--accent2);box-shadow:0 0 6px var(--accent2);animation:bk 2s infinite;}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.15}}
+
+/* ── PALETTE ── */
+.palette{height:52px;display:flex;align-items:center;gap:5px;padding:0 12px;background:#030b12;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;}
+.plabel{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);letter-spacing:2px;white-space:nowrap;}
+.dbtn{display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 9px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:2px;cursor:pointer;transition:all .15s;min-width:55px;}
+.dbtn:hover,.dbtn.sel{border-color:var(--accent);background:rgba(0,212,255,.06);}
+.dbtn .di{font-size:1.2rem;line-height:1;}
+.dbtn .dl{font-size:.55rem;font-family:'Share Tech Mono',monospace;color:var(--muted);}
+.dbtn.sel .dl{color:var(--accent);}
+.psep{width:1px;height:32px;background:var(--border);margin:0 3px;}
+
+/* ── WORKSPACE ── */
+.workspace{flex:1;display:flex;overflow:hidden;}
+#cw{flex:1;position:relative;overflow:hidden;}
+#cw::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;}
+#tc{position:absolute;inset:0;width:100%;height:100%;}
+
+/* ── RIGHT PANEL ── */
+#rp{width:460px;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;transition:width .25s;}
+#rp.col{width:0;overflow:hidden;}
+.ph{height:38px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.ptitle{font-family:'Orbitron',monospace;font-size:.62rem;font-weight:700;color:var(--accent);letter-spacing:2px;}
+.pclose{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;}
+.pclose:hover{color:var(--danger);}
+
+/* ── CLI TABS ── */
+.ctabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;min-height:34px;}
+.ctab{padding:6px 12px;background:none;border:none;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:.62rem;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s;display:flex;align-items:center;gap:5px;}
+.ctab.on{color:var(--accent);border-bottom-color:var(--accent);}
+.ctab .cx{opacity:.3;font-size:.7rem;}
+.ctab:hover .cx{opacity:1;color:var(--danger);}
+
+/* ── TERMINAL ── */
+.cbody{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.cout{flex:1;overflow-y:auto;padding:10px 12px;font-family:'Share Tech Mono',monospace;font-size:.72rem;line-height:1.7;background:#000;}
+.cout .lc{color:var(--accent);}
+.cout .lo{color:#00ff9d;}
+.cout .le{color:var(--danger);}
+.cout .li{color:var(--warn);}
+.cout .lm{color:var(--muted);}
+.cout .lt{color:var(--accent3);}
+.cout .lw{color:#fd79a8;}
+.cin-row{display:flex;align-items:center;padding:6px 10px;border-top:1px solid var(--border);background:#000;flex-shrink:0;}
+.cprompt{color:var(--accent);font-family:'Share Tech Mono',monospace;font-size:.72rem;white-space:nowrap;margin-right:5px;}
+.cinput{flex:1;background:none;border:none;color:#00ff9d;font-family:'Share Tech Mono',monospace;font-size:.72rem;outline:none;caret-color:var(--accent2);}
+
+/* ── STATUS BAR ── */
+.sbar{height:22px;background:#020609;border-top:1px solid var(--border);display:flex;align-items:center;padding:0 10px;gap:18px;font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);flex-shrink:0;}
+.sbar span{color:var(--text);}
+
+/* ── CONTEXT MENU ── */
+#ctx{position:fixed;background:var(--card);border:1px solid var(--border);border-radius:3px;z-index:8000;min-width:190px;box-shadow:0 8px 30px rgba(0,0,0,.9);display:none;}
+#ctx.on{display:block;}
+.ci{padding:8px 14px;font-family:'Share Tech Mono',monospace;font-size:.68rem;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .1s;}
+.ci:hover{background:rgba(0,212,255,.07);color:var(--accent);}
+.csep{height:1px;background:var(--border);margin:3px 0;}
+
+/* ── POPUP ── */
+#popup{position:fixed;background:var(--card);border:1px solid var(--accent);border-radius:4px;z-index:7000;padding:0;min-width:340px;max-width:440px;box-shadow:0 8px 40px rgba(0,212,255,.12);display:none;flex-direction:column;max-height:90vh;}
+#popup.on{display:flex;}
+.pop-hdr{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.pop-hdr h3{font-family:'Orbitron',monospace;font-size:.62rem;color:var(--accent);letter-spacing:2px;}
+.pop-body{padding:14px;overflow-y:auto;flex:1;}
+.pop-body label{display:block;font-size:.58rem;color:var(--muted);letter-spacing:1px;margin-bottom:3px;margin-top:8px;text-transform:uppercase;}
+.pop-body label:first-child{margin-top:0;}
+.pop-body input,.pop-body select{width:100%;background:#000;border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.72rem;padding:5px 9px;border-radius:2px;outline:none;}
+.pop-body input:focus,.pop-body select:focus{border-color:var(--accent);}
+.pop-section{font-family:'Orbitron',monospace;font-size:.55rem;color:var(--accent3);letter-spacing:2px;margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+.iface-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px;padding:6px;background:rgba(0,212,255,.03);border:1px solid var(--border);border-radius:2px;}
+.iface-row label{margin:0 0 2px;font-size:.55rem;}
+.iface-row input,.iface-row select{font-size:.65rem;padding:3px 6px;}
+.pop-foot{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;}
+.pbtn{flex:1;padding:7px;border:none;border-radius:2px;font-family:'Orbitron',monospace;font-size:.58rem;font-weight:700;letter-spacing:1px;cursor:pointer;}
+.pbtn-ok{background:var(--accent);color:#000;}
+.pbtn-del{background:var(--danger);color:#fff;}
+.pbtn-cancel{background:transparent;border:1px solid var(--border);color:var(--muted);}
+
+/* ── PACKET ANIM ── */
+.pkt{position:absolute;width:9px;height:9px;border-radius:50%;pointer-events:none;z-index:500;transform:translate(-50%,-50%);}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">NET<b>FORGE</b> <span style="font-size:.5rem;color:var(--muted);letter-spacing:1px">PRO</span></div>
+  <div class="hsep"></div>
+  <button class="hbtn on" id="m-add"    onclick="setMode('add')">＋ AGREGAR</button>
+  <button class="hbtn"    id="m-conn"   onclick="setMode('conn')">🔗 CONECTAR</button>
+  <button class="hbtn"    id="m-move"   onclick="setMode('move')">✋ MOVER</button>
+  <button class="hbtn"    id="m-del"    onclick="setMode('del')">🗑 ELIMINAR</button>
+  <div class="hsep"></div>
+  <button class="hbtn"    onclick="loadTpl()">📋 PLANTILLA</button>
+  <button class="hbtn"    onclick="doExport()">⬇ SVG</button>
+  <button class="hbtn red" onclick="clearAll()">⬛ LIMPIAR</button>
+  <div class="ml" style="display:flex;gap:10px;align-items:center;">
+    <div class="hdot"></div>
+    <span id="clk" style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted)"></span>
+    <button class="hbtn" onclick="togglePanel()">◧ CLI</button>
+  </div>
+</header>
+
+<!-- PALETTE -->
+<div class="palette">
+  <span class="plabel">AGREGAR:</span>
+  <button class="dbtn sel" id="dp-router"  onclick="selDev('router')"><span class="di">🔷</span><span class="dl">ROUTER</span></button>
+  <button class="dbtn"     id="dp-switch"  onclick="selDev('switch')"><span class="di">🔶</span><span class="dl">SWITCH</span></button>
+  <button class="dbtn"     id="dp-pc"      onclick="selDev('pc')"><span class="di">💻</span><span class="dl">PC</span></button>
+  <button class="dbtn"     id="dp-server"  onclick="selDev('server')"><span class="di">🖥</span><span class="dl">SERVIDOR</span></button>
+  <button class="dbtn"     id="dp-cloud"   onclick="selDev('cloud')"><span class="di">☁</span><span class="dl">ISP/NUBE</span></button>
+  <button class="dbtn"     id="dp-fw"      onclick="selDev('fw')"><span class="di">🛡</span><span class="dl">FIREWALL</span></button>
+  <button class="dbtn"     id="dp-ap"      onclick="selDev('ap')"><span class="di">📡</span><span class="dl">AP</span></button>
+  <button class="dbtn"     id="dp-phone"   onclick="selDev('phone')"><span class="di">📱</span><span class="dl">PHONE</span></button>
+  <div class="psep"></div>
+  <span class="plabel">MODO: <span id="mlabel" style="color:var(--accent)">AGREGAR</span></span>
+</div>
+
+<!-- WORKSPACE -->
+<div class="workspace">
+  <div id="cw"><canvas id="tc"></canvas></div>
+
+  <!-- CLI PANEL -->
+  <div id="rp">
+    <div class="ph">
+      <span class="ptitle">⬛ TERMINAL IOS/CLI</span>
+      <button class="pclose" onclick="togglePanel()">✕</button>
+    </div>
+    <div class="ctabs" id="ctabs"></div>
+    <div class="cbody" id="cbody">
+      <div class="cout" style="display:flex;align-items:center;justify-content:center;flex:1;">
+        <div style="text-align:center;font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--muted);">
+          Doble clic en un dispositivo<br>para abrir su terminal CLI
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div class="sbar">
+  <div>MODO: <span id="sb-mode">ADD</span></div>
+  <div>DISPOSITIVOS: <span id="sb-d">0</span></div>
+  <div>ENLACES: <span id="sb-l">0</span></div>
+  <div id="sb-hint">Seleccione tipo y haga clic en canvas</div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div id="ctx">
+  <div class="ci" onclick="ca('cli')">⬛ Abrir CLI</div>
+  <div class="ci" onclick="ca('cfg')">⚙ Configurar Dispositivo</div>
+  <div class="ci" onclick="ca('ifaces')">🔌 Ver Interfaces</div>
+  <div class="ci" onclick="ca('ping')">📡 Ping rápido...</div>
+  <div class="ci" onclick="ca('trace')">🗺 Traceroute...</div>
+  <div class="csep"></div>
+  <div class="ci" onclick="ca('del')" style="color:var(--danger)">🗑 Eliminar</div>
+</div>
+
+<!-- CONFIG POPUP -->
+<div id="popup">
+  <div class="pop-hdr">
+    <h3 id="pop-title">CONFIGURAR DISPOSITIVO</h3>
+    <button class="pclose" onclick="closePopup()">✕</button>
+  </div>
+  <div class="pop-body" id="pop-body"></div>
+  <div class="pop-foot">
+    <button class="pbtn pbtn-ok" onclick="savePopup()">GUARDAR</button>
+    <button class="pbtn pbtn-cancel" onclick="closePopup()">CANCELAR</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════════════════════════
+(function tick(){document.getElementById('clk').textContent=new Date().toLocaleTimeString('es',{hour12:false});setTimeout(tick,1000);})();
+
+// ═══════════════════════════════════════════════════════
+// DEVICE CONFIG
+// ═══════════════════════════════════════════════════════
+const DC={
+  router: {icon:'🔷',color:'#00d4ff',label:'Router', r:28, ifacePrefix:'GigabitEthernet', ifaceCount:4, canRoute:true,  isSwitch:false},
+  switch: {icon:'🔶',color:'#ffa502',label:'Switch',  r:26, ifacePrefix:'FastEthernet',    ifaceCount:24,canRoute:false, isSwitch:true},
+  pc:     {icon:'💻',color:'#00ff9d',label:'PC',      r:22, ifacePrefix:'Ethernet',         ifaceCount:1, canRoute:false, isSwitch:false},
+  server: {icon:'🖥',color:'#a29bfe',label:'Servidor',r:24, ifacePrefix:'Ethernet',         ifaceCount:2, canRoute:false, isSwitch:false},
+  cloud:  {icon:'☁', color:'#74b9ff',label:'ISP',     r:30, ifacePrefix:'Serial',           ifaceCount:2, canRoute:true,  isSwitch:false},
+  fw:     {icon:'🛡',color:'#ff7675',label:'Firewall',r:25, ifacePrefix:'GigabitEthernet',  ifaceCount:3, canRoute:true,  isSwitch:false},
+  ap:     {icon:'📡',color:'#55efc4',label:'AP',      r:22, ifacePrefix:'Dot11Radio',       ifaceCount:2, canRoute:false, isSwitch:false},
+  phone:  {icon:'📱',color:'#fd79a8',label:'Phone',   r:20, ifacePrefix:'Wireless',         ifaceCount:1, canRoute:false, isSwitch:false},
+};
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let devices=[], links=[], mode='add', selType='router';
+let ctxDev=null, popDev=null, connFrom=null, drag=null, dox=0, doy=0;
+let sessions={}, activeId=null, pkts=[];
+let devCnt={};
+
+// ═══════════════════════════════════════════════════════
+// CANVAS
+// ═══════════════════════════════════════════════════════
+const canvas=document.getElementById('tc');
+const ctx=canvas.getContext('2d');
+let W=0,H=0;
+function resize(){const w=document.getElementById('cw');W=canvas.width=w.clientWidth;H=canvas.height=w.clientHeight;draw();}
+window.addEventListener('resize',resize);
+setTimeout(resize,60);
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // Grid
+  ctx.strokeStyle='rgba(0,212,255,.025)';ctx.lineWidth=1;
+  for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  // Links
+  links.forEach(l=>{
+    const a=byId(l.from),b=byId(l.to);if(!a||!b)return;
+    const active=l.active||false;
+    ctx.save();
+    ctx.setLineDash(active?[]:[8,4]);
+    ctx.strokeStyle=active?'rgba(0,255,157,.8)':'rgba(0,212,255,.3)';
+    ctx.lineWidth=active?2.5:1.5;
+    if(active){ctx.shadowBlur=8;ctx.shadowColor='rgba(0,255,157,.5)';}
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+    ctx.restore();
+    if(l.label){
+      const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+      ctx.font='9px Share Tech Mono,monospace';
+      ctx.fillStyle='rgba(255,107,53,.9)';ctx.textAlign='center';
+      ctx.fillText(l.label,mx,my-8);
+    }
+  });
+
+  // Devices
+  devices.forEach(d=>{
+    const c=DC[d.type],r=c.r;
+    ctx.save();
+    ctx.shadowBlur=connFrom&&connFrom.id===d.id?20:10;
+    ctx.shadowColor=c.color;
+    ctx.beginPath();ctx.arc(d.x,d.y,r,0,Math.PI*2);
+    const g=ctx.createRadialGradient(d.x,d.y-r*.3,0,d.x,d.y,r);
+    g.addColorStop(0,hex2rgba(c.color,.2));g.addColorStop(1,hex2rgba(c.color,.05));
+    ctx.fillStyle=g;ctx.fill();
+    ctx.strokeStyle=connFrom&&connFrom.id===d.id?c.color:hex2rgba(c.color,.65);
+    ctx.lineWidth=connFrom&&connFrom.id===d.id?2.5:1.5;ctx.stroke();
+    ctx.restore();
+    ctx.font=`${r*.88}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(c.icon,d.x,d.y+1);
+    ctx.font='bold 10.5px Share Tech Mono,monospace';
+    ctx.fillStyle=c.color;ctx.textBaseline='top';
+    ctx.fillText(d.name,d.x,d.y+r+4);
+    // Show primary IP
+    const pri=d.interfaces.find(i=>i.ip);
+    if(pri){ctx.font='9.5px Share Tech Mono,monospace';ctx.fillStyle='rgba(184,216,240,.6)';ctx.fillText(pri.ip+'/'+pri.cidr,d.x,d.y+r+17);}
+    // CLI indicator
+    if(sessions[d.id]){
+      ctx.beginPath();ctx.arc(d.x+r-4,d.y-r+4,4,0,Math.PI*2);
+      ctx.fillStyle='#00ff9d';ctx.shadowBlur=6;ctx.shadowColor='#00ff9d';ctx.fill();ctx.shadowBlur=0;
+    }
+  });
+
+  // Packets
+  pkts=pkts.filter(p=>{
+    p.t+=.028;if(p.t>1)return false;
+    const ease=p.t<.5?2*p.t*p.t:1-Math.pow(-2*p.t+2,2)/2;
+    const x=p.x0+(p.x1-p.x0)*ease,y=p.y0+(p.y1-p.y0)*ease;
+    ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);
+    ctx.fillStyle=p.color;ctx.shadowBlur=14;ctx.shadowColor=p.color;ctx.fill();ctx.shadowBlur=0;
+    return true;
+  });
+  requestAnimationFrame(draw);
+}
+
+function hex2rgba(hex,a){const[r,g,b]=hexRGB(hex);return `rgba(${r},${g},${b},${a})`;}
+function hexRGB(h){h=h.replace('#','');return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+
+// ═══════════════════════════════════════════════════════
+// MODE
+// ═══════════════════════════════════════════════════════
+function setMode(m){
+  mode=m;if(m!=='conn')connFrom=null;
+  document.querySelectorAll('.hbtn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('m-'+m).classList.add('on');
+  const L={add:'AGREGAR',conn:'CONECTAR',move:'MOVER',del:'ELIMINAR'};
+  document.getElementById('mlabel').textContent=L[m]||m;
+  document.getElementById('sb-mode').textContent=L[m]||m;
+  const H2={add:'Clic en canvas para agregar',conn:'Clic en origen → destino',move:'Arrastra dispositivos',del:'Clic en dispositivo o enlace'};
+  document.getElementById('sb-hint').textContent=H2[m]||'';
+}
+function selDev(t){
+  selType=t;
+  document.querySelectorAll('.dbtn').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('dp-'+t).classList.add('sel');
+  setMode('add');
+}
+
+// ═══════════════════════════════════════════════════════
+// DEVICE FACTORY
+// ═══════════════════════════════════════════════════════
+function makeDevice(type,x,y){
+  if(!devCnt[type])devCnt[type]=0;devCnt[type]++;
+  const c=DC[type],n=devCnt[type];
+  const id='d'+Date.now()+Math.random().toString(36).slice(2,5);
+  const label=c.label.slice(0,2).toUpperCase();
+  const name=label+'-'+n;
+
+  // Build interfaces
+  const ifaces=[];
+  for(let i=0;i<c.ifaceCount;i++){
+    ifaces.push({
+      name:`${c.ifacePrefix}${c.ifaceCount>4?'0/'+i:'0/'+i}`,
+      shortName:`${c.ifacePrefix.slice(0,2).toLowerCase()}0/${i}`,
+      ip:'',cidr:24,mask:'',desc:'',status:i===0?'up':'administratively down',
+      mac:randMAC(),speed:c.ifacePrefix.includes('Gigabit')?'1000Mbps':c.ifacePrefix.includes('Fast')?'100Mbps':'Auto',
+      duplex:'Full',inPkts:0,outPkts:0,inBytes:0,outBytes:0,errors:0
+    });
+  }
+  // Auto-assign management IP
+  if(type==='router')   ifaces[0].ip=`10.${n}.0.1`,ifaces[0].cidr=24,ifaces[0].mask=cidr2mask(24),ifaces[0].status='up';
+  if(type==='switch')   ifaces[0].ip=`192.168.${n}.1`,ifaces[0].cidr=24,ifaces[0].mask=cidr2mask(24),ifaces[0].status='up';
+  if(type==='pc')       ifaces[0].ip=`192.168.1.${10+n}`,ifaces[0].cidr=24,ifaces[0].mask=cidr2mask(24),ifaces[0].status='up';
+  if(type==='server')   ifaces[0].ip=`192.168.1.${100+n}`,ifaces[0].cidr=24,ifaces[0].mask=cidr2mask(24),ifaces[0].status='up';
+  if(type==='cloud')    ifaces[0].ip=`200.${n}.1.1`,ifaces[0].cidr=30,ifaces[0].mask=cidr2mask(30),ifaces[0].status='up';
+  if(type==='fw')       ifaces[0].ip=`172.16.${n}.1`,ifaces[0].cidr=24,ifaces[0].mask=cidr2mask(24),ifaces[0].status='up';
+  if(type==='ap')       ifaces[0].ip=`192.168.10.${n}`,ifaces[0].cidr=24,ifaces[0].mask=cidr2mask(24),ifaces[0].status='up';
+  if(type==='phone')    ifaces[0].ip=`192.168.20.${50+n}`,ifaces[0].cidr=24,ifaces[0].mask=cidr2mask(24),ifaces[0].status='up';
+
+  // Routing tables
+  const routing={
+    static:[],
+    ospf:{enabled:false,pid:1,rid:'',networks:[],neighbors:[],lsdb:[]},
+    eigrp:{enabled:false,asn:100,networks:[],neighbors:[],topology:[]},
+    bgp:{enabled:false,asn:65000,neighbors:[],networks:[],table:[]}
+  };
+
+  // VLANs (switches)
+  const vlans=type==='switch'?[
+    {id:1,name:'default',ports:[],status:'active'},
+    {id:10,name:'ADMIN',ports:[],status:'active'},
+    {id:20,name:'USUARIOS',ports:[],status:'active'},
+    {id:30,name:'SERVIDORES',ports:[],status:'active'},
+  ]:[];
+
+  // ACLs
+  const acls=[];
+  // NAT
+  const nat={enabled:false,inside:[],outside:'',pool:[]};
+  // DHCP
+  const dhcp={pools:[],excluded:[]};
+  // CDP/LLDP neighbors
+  const cdp={enabled:true};
+  // Spanning tree
+  const stp={mode:'rapid-pvst',priority:32768,root:false};
+
+  const hostname=name;
+  const enablePass='';
+  const secret='';
+
+  return {id,type,x,y,name,hostname,interfaces:ifaces,routing,vlans,acls,nat,dhcp,cdp,stp,
+    enablePass,secret,desc:'',uptime:rand(0,8640000),banner:'',
+    ios: type==='switch'?'Cisco IOS 15.2(7)E3':'Cisco IOS 15.7(3)M4a',
+    configHistory:[]};
+}
+
+// ═══════════════════════════════════════════════════════
+// CANVAS EVENTS
+// ═══════════════════════════════════════════════════════
+canvas.addEventListener('mousedown',e=>{
+  if(e.button===2)return;
+  const{x,y}=cxy(e),hit=hitDev(x,y);
+  if(mode==='add'&&!hit){const d=makeDevice(selType,x,y);devices.push(d);statUpd();}
+  else if(mode==='del'){
+    if(hit){remDev(hit.id);}
+    else{const li=hitLink(x,y);if(li!==null)links.splice(li,1);}
+    statUpd();
+  }
+  else if(mode==='move'&&hit){drag=hit;dox=x-hit.x;doy=y-hit.y;}
+  else if(mode==='conn'&&hit){
+    if(!connFrom){connFrom=hit;document.getElementById('sb-hint').textContent='Clic en dispositivo DESTINO';}
+    else{
+      if(connFrom.id!==hit.id){
+        // Pick interfaces
+        const aIf=connFrom.interfaces.find(i=>i.status==='up')||connFrom.interfaces[0];
+        const bIf=hit.interfaces.find(i=>i.status==='up')||hit.interfaces[0];
+        const dup=links.find(l=>(l.from===connFrom.id&&l.to===hit.id)||(l.from===hit.id&&l.to===connFrom.id));
+        if(!dup)links.push({from:connFrom.id,to:hit.id,fromIf:aIf?.name||'',toIf:bIf?.name||'',label:'',active:true,bw:'1Gbps'});
+        statUpd();
+      }
+      connFrom=null;document.getElementById('sb-hint').textContent='Clic en dispositivo ORIGEN';
+    }
+  }
+});
+canvas.addEventListener('mousemove',e=>{if(drag){const{x,y}=cxy(e);drag.x=x-dox;drag.y=y-doy;}});
+canvas.addEventListener('mouseup',()=>{drag=null;});
+canvas.addEventListener('dblclick',e=>{
+  const{x,y}=cxy(e),hit=hitDev(x,y);
+  if(hit)openCLI(hit);
+  else{const li=hitLink(x,y);if(li!==null){const l=prompt('Etiqueta enlace:',links[li].label||'');if(l!==null)links[li].label=l;}}
+});
+canvas.addEventListener('contextmenu',e=>{
+  e.preventDefault();const{x,y}=cxy(e),hit=hitDev(x,y);
+  if(hit){ctxDev=hit;const m=document.getElementById('ctx');m.style.left=e.clientX+'px';m.style.top=e.clientY+'px';m.classList.add('on');}
+});
+document.addEventListener('click',e=>{if(!e.target.closest('#ctx'))document.getElementById('ctx').classList.remove('on');});
+document.addEventListener('click',e=>{if(!e.target.closest('#popup')&&!e.target.closest('#ctx')){}});
+
+function cxy(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+function byId(id){return devices.find(d=>d.id===id);}
+function hitDev(x,y){return devices.find(d=>Math.hypot(d.x-x,d.y-y)<=DC[d.type].r+6);}
+function hitLink(x,y){
+  for(let i=0;i<links.length;i++){
+    const l=links[i],a=byId(l.from),b=byId(l.to);if(!a||!b)continue;
+    if(ptSeg(x,y,a.x,a.y,b.x,b.y)<9)return i;
+  }return null;
+}
+function ptSeg(px,py,ax,ay,bx,by){const dx=bx-ax,dy=by-ay,t=Math.max(0,Math.min(1,((px-ax)*dx+(py-ay)*dy)/(dx*dx+dy*dy||1)));return Math.hypot(px-(ax+t*dx),py-(ay+t*dy));}
+function remDev(id){devices=devices.filter(d=>d.id!==id);links=links.filter(l=>l.from!==id&&l.to!==id);if(sessions[id]){delete sessions[id];if(activeId===id){const k=Object.keys(sessions);activeId=k.length?k[k.length-1]:null;}renderTabs();}}
+function statUpd(){document.getElementById('sb-d').textContent=devices.length;document.getElementById('sb-l').textContent=links.length;}
+
+// ═══════════════════════════════════════════════════════
+// CONTEXT MENU
+// ═══════════════════════════════════════════════════════
+function ca(act){
+  document.getElementById('ctx').classList.remove('on');
+  if(!ctxDev)return;
+  if(act==='cli')openCLI(ctxDev);
+  else if(act==='cfg')openPopup(ctxDev);
+  else if(act==='ifaces'){openCLI(ctxDev);setTimeout(()=>execCmd(ctxDev.id,'show interfaces'),200);}
+  else if(act==='ping'){const ip=prompt('Ping a IP:','');if(ip){openCLI(ctxDev);setTimeout(()=>execCmd(ctxDev.id,'ping '+ip),200);}}
+  else if(act==='trace'){const ip=prompt('Traceroute a IP:','');if(ip){openCLI(ctxDev);setTimeout(()=>execCmd(ctxDev.id,'traceroute '+ip),200);}}
+  else if(act==='del'){remDev(ctxDev.id);statUpd();}
+}
+
+// ═══════════════════════════════════════════════════════
+// CONFIG POPUP (multi-interface)
+// ═══════════════════════════════════════════════════════
+function openPopup(dev){
+  popDev=dev;
+  document.getElementById('pop-title').textContent='CONFIGURAR — '+dev.name;
+  const body=document.getElementById('pop-body');
+  body.innerHTML=`
+  <label>HOSTNAME</label><input id="pp-host" value="${dev.hostname}">
+  <label>ENABLE SECRET</label><input id="pp-sec" type="password" value="${dev.secret}">
+  <label>BANNER MOTD</label><input id="pp-ban" value="${dev.banner||''}">
+  <label>IOS VERSION</label><input id="pp-ios" value="${dev.ios}">
+  <label>DESCRIPCIÓN</label><input id="pp-desc" value="${dev.desc}">
+
+  <div class="pop-section">INTERFACES</div>
+  ${dev.interfaces.map((iface,i)=>`
+  <div style="font-size:.6rem;color:var(--accent);font-family:'Share Tech Mono',monospace;margin-bottom:4px;">${iface.name}</div>
+  <div class="iface-row">
+    <div><label>IP ADDRESS</label><input id="if-ip-${i}" value="${iface.ip}" placeholder="10.0.0.1"></div>
+    <div><label>CIDR /</label><input id="if-ci-${i}" type="number" min="1" max="32" value="${iface.cidr}"></div>
+    <div><label>STATUS</label><select id="if-st-${i}">
+      <option value="up" ${iface.status==='up'?'selected':''}>up</option>
+      <option value="administratively down" ${iface.status==='administratively down'?'selected':''}>shutdown</option>
+    </select></div>
+  </div>
+  <div class="iface-row">
+    <div><label>DESCRIPCIÓN</label><input id="if-de-${i}" value="${iface.desc}" placeholder="Descripción..."></div>
+    <div><label>SPEED</label><select id="if-sp-${i}">
+      <option value="10Mbps"   ${iface.speed==='10Mbps'?'selected':''}>10Mbps</option>
+      <option value="100Mbps"  ${iface.speed==='100Mbps'?'selected':''}>100Mbps</option>
+      <option value="1000Mbps" ${iface.speed==='1000Mbps'?'selected':''}>1Gbps</option>
+      <option value="10Gbps"   ${iface.speed==='10Gbps'?'selected':''}>10Gbps</option>
+    </select></div>
+    <div><label>DUPLEX</label><select id="if-du-${i}">
+      <option value="Full">Full</option><option value="Half" ${iface.duplex==='Half'?'selected':''}>Half</option>
+    </select></div>
+  </div>`).join('')}
+
+  ${DC[dev.type].canRoute?`
+  <div class="pop-section">ROUTING</div>
+  <label>GATEWAY POR DEFECTO</label><input id="pp-gw" value="${dev.routing.static.find(r=>r.dst==='0.0.0.0')?.nh||''}">
+  <label>OSPF — PID</label><input id="pp-ospf-pid" value="${dev.routing.ospf.pid}" placeholder="1">
+  <label>OSPF — ROUTER-ID</label><input id="pp-ospf-rid" value="${dev.routing.ospf.rid}" placeholder="1.1.1.1">
+  <label>OSPF — REDES (CIDR, separadas por coma)</label><input id="pp-ospf-nets" value="${dev.routing.ospf.networks.join(',')}" placeholder="10.0.0.0/24,192.168.1.0/24">
+  <label>EIGRP — ASN</label><input id="pp-eigrp-asn" value="${dev.routing.eigrp.asn}" placeholder="100">
+  <label>EIGRP — REDES</label><input id="pp-eigrp-nets" value="${dev.routing.eigrp.networks.join(',')}" placeholder="10.0.0.0/8">
+  <label>BGP — ASN LOCAL</label><input id="pp-bgp-asn" value="${dev.routing.bgp.asn}" placeholder="65000">
+  <label>BGP — VECINOS (ip:asn, separados por coma)</label><input id="pp-bgp-nb" value="${dev.routing.bgp.neighbors.map(n=>n.ip+':'+n.asn).join(',')}" placeholder="10.0.0.2:65001">
+  `:''}
+
+  ${dev.type==='switch'?`
+  <div class="pop-section">SPANNING TREE</div>
+  <label>STP MODE</label>
+  <select id="pp-stp">
+    <option value="pvst" ${dev.stp.mode==='pvst'?'selected':''}>PVST+</option>
+    <option value="rapid-pvst" ${dev.stp.mode==='rapid-pvst'?'selected':''}>Rapid-PVST+</option>
+    <option value="mst" ${dev.stp.mode==='mst'?'selected':''}>MST</option>
+  </select>
+  <label>BRIDGE PRIORITY</label><input id="pp-stp-pri" value="${dev.stp.priority}">
+  `:''}
+  `;
+  document.getElementById('popup').classList.add('on');
+}
+
+function savePopup(){
+  if(!popDev)return;
+  const d=popDev;
+  d.hostname=document.getElementById('pp-host').value||d.hostname;
+  d.name=d.hostname;
+  d.secret=document.getElementById('pp-sec').value;
+  d.banner=document.getElementById('pp-ban').value;
+  d.ios=document.getElementById('pp-ios').value;
+  d.desc=document.getElementById('pp-desc').value;
+  d.interfaces.forEach((iface,i)=>{
+    iface.ip=document.getElementById(`if-ip-${i}`)?.value||iface.ip;
+    iface.cidr=parseInt(document.getElementById(`if-ci-${i}`)?.value)||iface.cidr;
+    iface.mask=cidr2mask(iface.cidr);
+    iface.status=document.getElementById(`if-st-${i}`)?.value||iface.status;
+    iface.desc=document.getElementById(`if-de-${i}`)?.value||iface.desc;
+    iface.speed=document.getElementById(`if-sp-${i}`)?.value||iface.speed;
+    iface.duplex=document.getElementById(`if-du-${i}`)?.value||iface.duplex;
+  });
+  if(DC[d.type].canRoute){
+    const gw=document.getElementById('pp-gw')?.value;
+    if(gw){const existing=d.routing.static.find(r=>r.dst==='0.0.0.0');if(existing)existing.nh=gw;else d.routing.static.push({dst:'0.0.0.0',mask:'0.0.0.0',nh:gw,ad:1,iface:''});}
+    // OSPF
+    const op=document.getElementById('pp-ospf-pid')?.value;
+    const or=document.getElementById('pp-ospf-rid')?.value;
+    const on=document.getElementById('pp-ospf-nets')?.value;
+    if(op){d.routing.ospf.pid=parseInt(op);d.routing.ospf.enabled=true;}
+    if(or)d.routing.ospf.rid=or;
+    if(on)d.routing.ospf.networks=on.split(',').map(s=>s.trim()).filter(Boolean);
+    // EIGRP
+    const ea=document.getElementById('pp-eigrp-asn')?.value;
+    const en=document.getElementById('pp-eigrp-nets')?.value;
+    if(ea){d.routing.eigrp.asn=parseInt(ea);}
+    if(en){d.routing.eigrp.networks=en.split(',').map(s=>s.trim()).filter(Boolean);d.routing.eigrp.enabled=true;}
+    // BGP
+    const ba=document.getElementById('pp-bgp-asn')?.value;
+    const bn=document.getElementById('pp-bgp-nb')?.value;
+    if(ba){d.routing.bgp.asn=parseInt(ba);}
+    if(bn){d.routing.bgp.neighbors=bn.split(',').map(s=>{const[ip,asn]=s.trim().split(':');return{ip,asn:parseInt(asn)||65000};}).filter(n=>n.ip);d.routing.bgp.enabled=true;}
+  }
+  if(d.type==='switch'){
+    const sm=document.getElementById('pp-stp')?.value;
+    const sp=document.getElementById('pp-stp-pri')?.value;
+    if(sm)d.stp.mode=sm;
+    if(sp)d.stp.priority=parseInt(sp);
+  }
+  closePopup();
+}
+function closePopup(){document.getElementById('popup').classList.remove('on');popDev=null;}
+
+// ═══════════════════════════════════════════════════════
+// CLI ENGINE
+// ═══════════════════════════════════════════════════════
+function openCLI(dev){
+  document.getElementById('rp').classList.remove('col');
+  if(!sessions[dev.id]){
+    sessions[dev.id]={devId:dev.id,mode:'user',ifaceCtx:null,ospfCtx:false,eigrpCtx:false,bgpCtx:false,aclCtx:null,dhcpCtx:null,lines:[],cmdHist:[],histIdx:-1};
+    sessions[dev.id].lines=bootLines(dev);
+  }
+  activeId=dev.id;
+  renderTabs();renderCLI();
+  setTimeout(()=>document.getElementById('cli-in')?.focus(),80);
+}
+
+function bootLines(dev){
+  const c=DC[dev.type];
+  return[
+    {t:'lt',v:''},
+    {t:'lt',v:`╔══════════════════════════════════════════════════╗`},
+    {t:'lt',v:`  NetForge PRO — ${c.label} Simulator`},
+    {t:'lt',v:`╚══════════════════════════════════════════════════╝`},
+    {t:'lm',v:`  Hostname : ${dev.hostname}`},
+    {t:'lm',v:`  IOS      : ${dev.ios}`},
+    {t:'lm',v:`  Uptime   : ${fmtUptime(dev.uptime)}`},
+    {t:'lm',v:`  Ifaces   : ${dev.interfaces.length} (${dev.interfaces.filter(i=>i.status==='up').length} up)`},
+    {t:'lm',v:'──────────────────────────────────────────────────'},
+    {t:'lo',v:'Sistema listo. Escriba ? o help para ver comandos.'},
+    {t:'lm',v:''},
+  ];
+}
+
+function renderTabs(){
+  const el=document.getElementById('ctabs');
+  const ids=Object.keys(sessions);
+  if(!ids.length){el.innerHTML='<div style="padding:6px 12px;font-family:\'Share Tech Mono\',monospace;font-size:.62rem;color:var(--muted)">Sin sesiones abiertas</div>';renderEmpty();return;}
+  el.innerHTML=ids.map(id=>{
+    const d=byId(id);if(!d)return'';
+    const c=DC[d.type];
+    return`<button class="ctab ${id===activeId?'on':''}" onclick="switchTab('${id}')"><span style="color:${c.color}">${c.icon}</span>${d.name}<span class="cx" onclick="closeTab(event,'${id}')">✕</span></button>`;
+  }).join('');
+  renderCLI();
+}
+
+function switchTab(id){activeId=id;renderTabs();setTimeout(()=>document.getElementById('cli-in')?.focus(),50);}
+function closeTab(e,id){e.stopPropagation();delete sessions[id];const k=Object.keys(sessions);activeId=k.length?k[k.length-1]:null;renderTabs();}
+function renderEmpty(){document.getElementById('cbody').innerHTML='<div class="cout" style="display:flex;align-items:center;justify-content:center;"><div style="text-align:center;font-family:\'Share Tech Mono\',monospace;font-size:.72rem;color:var(--muted)">Doble clic en dispositivo<br>para abrir CLI</div></div>';}
+
+function renderCLI(){
+  if(!activeId||!sessions[activeId]){renderEmpty();return;}
+  const s=sessions[activeId],d=byId(activeId);if(!d)return;
+  const pr=prompt_str(d,s);
+  document.getElementById('cbody').innerHTML=`
+  <div class="cout" id="co-${activeId}">${s.lines.map(renderLine).join('')}</div>
+  <div class="cin-row">
+    <span class="cprompt" id="cp">${pr}</span>
+    <input class="cinput" id="cli-in" autocomplete="off" spellcheck="false"
+      onkeydown="onKey(event,'${activeId}')" placeholder="Ingrese comando...">
+  </div>`;
+  scrollCLI();
+}
+
+function renderLine(l){return`<div class="${l.t}">${escH(l.v)}</div>`;}
+function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function scrollCLI(){const o=document.getElementById('co-'+activeId);if(o)o.scrollTop=o.scrollHeight;}
+
+function prompt_str(dev,s){
+  if(s.mode==='user')return dev.hostname+'>';
+  if(s.mode==='priv')return dev.hostname+'#';
+  if(s.mode==='config')return dev.hostname+'(config)#';
+  if(s.mode==='iface')return dev.hostname+'(config-if)#';
+  if(s.mode==='ospf')return dev.hostname+'(config-router)#';
+  if(s.mode==='eigrp')return dev.hostname+'(config-router)#';
+  if(s.mode==='bgp')return dev.hostname+'(config-router)#';
+  if(s.mode==='dhcp')return dev.hostname+'(dhcp-config)#';
+  if(s.mode==='acl')return dev.hostname+'(config-ext-nacl)#';
+  if(s.mode==='vlan')return dev.hostname+'(config-vlan)#';
+  if(s.mode==='line')return dev.hostname+'(config-line)#';
+  if(s.mode==='subif')return dev.hostname+'(config-subif)#';
+  return dev.hostname+'>';
+}
+
+function onKey(e,devId){
+  const s=sessions[devId];if(!s)return;
+  const inp=e.target;
+  if(e.key==='Enter'){
+    const cmd=inp.value.trim();inp.value='';
+    if(cmd){s.cmdHist.unshift(cmd);if(s.cmdHist.length>100)s.cmdHist.pop();s.histIdx=-1;}
+    execCmd(devId,cmd);
+  }else if(e.key==='ArrowUp'){s.histIdx=Math.min(s.histIdx+1,s.cmdHist.length-1);inp.value=s.cmdHist[s.histIdx]||'';e.preventDefault();}
+  else if(e.key==='ArrowDown'){s.histIdx=Math.max(s.histIdx-1,-1);inp.value=s.histIdx>=0?s.cmdHist[s.histIdx]:'';e.preventDefault();}
+  else if(e.key==='Tab'){e.preventDefault();doTab(devId,inp);}
+  else if(e.key==='?'&&!inp.value){e.preventDefault();execCmd(devId,'?');}
+}
+
+function doTab(devId,inp){
+  const val=inp.value.toLowerCase().trimStart();
+  const cmds=allCmds(devId);
+  const matches=cmds.filter(c=>c.toLowerCase().startsWith(val));
+  if(matches.length===1){inp.value=matches[0]+' ';}
+  else if(matches.length>1){pushLines(devId,[{t:'lm',v:matches.join('   ')}]);}
+}
+
+function allCmds(devId){
+  const s=sessions[devId];const d=byId(devId);if(!s||!d)return[];
+  if(s.mode==='user')return['enable','disable','ping','traceroute','show','exit','quit','logout','?'];
+  if(s.mode==='priv')return['configure terminal','show','ping','traceroute','tracert','debug','undebug','clear','write','copy','reload','disable','exit','clock set','no','?'];
+  if(s.mode==='config')return['hostname','interface','ip route','ip dhcp','ip nat','ip access-list','router ospf','router eigrp','router bgp','spanning-tree','vlan','banner motd','enable secret','enable password','line','username','service','no','do','exit','end','?'];
+  if(s.mode==='iface')return['ip address','ip nat','ip ospf','ip helper-address','ipv6 address','no shutdown','shutdown','description','speed','duplex','switchport','channel-group','standby','no','exit','end','?'];
+  if(s.mode==='ospf'||s.mode==='eigrp'||s.mode==='bgp')return['network','neighbor','redistribute','passive-interface','default-information','area','no','exit','end','?'];
+  return['no','exit','end','?'];
+}
+
+// ═══════════════════════════════════════════════════════
+// COMMAND EXECUTOR
+// ═══════════════════════════════════════════════════════
+function execCmd(devId,raw){
+  const s=sessions[devId],d=byId(devId);if(!s||!d)return;
+  const pr=prompt_str(d,s);
+  if(raw!=='')s.lines.push({t:'lc',v:pr+' '+raw});
+
+  const cmd=raw.trim();
+  if(!cmd){push(devId);return;}
+
+  const p=cmd.split(/\s+/);
+  const base=p[0].toLowerCase();
+  const rest=p.slice(1).join(' ');
+  const all=cmd.toLowerCase();
+
+  // ── HELP / ? ──
+  if(base==='?'||base==='help'){showHelp(devId,s);return;}
+
+  // ── MODE: USER ──
+  if(s.mode==='user'){
+    if(base==='enable'||base==='en'){
+      if(d.secret&&p[1]!==d.secret&&rest!==d.secret){
+        // prompt password
+        s.mode='priv'; // simplified
+      }
+      s.mode='priv';push(devId,{t:'lo',v:'Modo privilegiado habilitado.'});
+    }
+    else if(base==='ping')simulatePing(devId,d,p[1]);
+    else if(base==='traceroute'||base==='tracert')simTraceroute(devId,d,p[1]);
+    else if(base==='show')doShow(devId,d,s,rest);
+    else if(base==='exit'||base==='logout'||base==='quit'){push(devId,{t:'lm',v:'Sesión cerrada.'});closeTab({stopPropagation:()=>{}},devId);}
+    else unkCmd(devId,cmd);
+    refreshCLI(devId);return;
+  }
+
+  // ── MODE: PRIVILEGED ──
+  if(s.mode==='priv'){
+    if(base==='configure'||all==='conf t'||all==='configure terminal'){s.mode='config';push(devId,{t:'lo',v:'Entrando a modo configuración global...'});}
+    else if(base==='show'||base==='sh')doShow(devId,d,s,rest);
+    else if(base==='ping')simulatePing(devId,d,p[1]);
+    else if(base==='traceroute'||base==='tracert')simTraceroute(devId,d,p[1]);
+    else if(base==='debug')doDebug(devId,d,s,rest);
+    else if(base==='undebug'||base==='no'&&rest.startsWith('debug'))push(devId,{t:'li',v:'Todos los debugs desactivados.'});
+    else if(base==='clear')doClear(devId,d,s,rest);
+    else if(base==='write'||all==='copy running-config startup-config'||all==='wr'){
+      push(devId,{t:'li',v:'Building configuration...'});
+      setTimeout(()=>{push(devId,{t:'lo',v:'[OK] Configuración guardada exitosamente.'});refreshCLI(devId);},800);return;
+    }
+    else if(base==='reload'){
+      push(devId,{t:'lw',v:'Reload requested. System will restart in 5 seconds...'});
+      setTimeout(()=>{sessions[devId].lines=bootLines(d);sessions[devId].mode='user';refreshCLI(devId);},2000);return;
+    }
+    else if(base==='clock'&&p[1]==='set'){
+      const timeStr=p.slice(2).join(' ');push(devId,{t:'lo',v:`Reloj ajustado a: ${timeStr||new Date().toLocaleString()}`});
+    }
+    else if(base==='disable'){s.mode='user';push(devId,{t:'lo',v:'Volviendo a modo usuario.'});}
+    else if(base==='exit'||base==='end'){s.mode='user';}
+    else if(base==='do')doShow(devId,d,s,rest);
+    else unkCmd(devId,cmd);
+    refreshCLI(devId);return;
+  }
+
+  // ── MODE: CONFIG ──
+  if(s.mode==='config'){
+    if(base==='hostname'){d.hostname=p[1]||d.hostname;d.name=d.hostname;push(devId,{t:'lo',v:`Hostname cambiado a: ${d.hostname}`});}
+    else if(base==='enable'&&p[1]==='secret'){d.secret=p[2]||'';push(devId,{t:'lo',v:'Enable secret configurado.'});}
+    else if(base==='enable'&&p[1]==='password'){d.enablePass=p[2]||'';push(devId,{t:'lo',v:'Enable password configurado.'});}
+    else if(base==='banner'&&p[1]==='motd'){d.banner=p.slice(2).join(' ');push(devId,{t:'lo',v:'Banner configurado.'});}
+    else if(base==='interface'||base==='int'){doIfaceEnter(devId,d,s,rest);}
+    else if(base==='ip'&&p[1]==='route')doStaticRoute(devId,d,s,p.slice(2));
+    else if(base==='ip'&&p[1]==='dhcp')doDHCPConfig(devId,d,s,p.slice(2));
+    else if(base==='ip'&&p[1]==='nat')doNATConfig(devId,d,s,p.slice(2));
+    else if(base==='ip'&&p[1]==='access-list')doACLConfig(devId,d,s,p.slice(2));
+    else if(base==='router'&&p[1]==='ospf')doOSPFEnter(devId,d,s,p[2]);
+    else if(base==='router'&&p[1]==='eigrp')doEIGRPEnter(devId,d,s,p[2]);
+    else if(base==='router'&&p[1]==='bgp')doBGPEnter(devId,d,s,p[2]);
+    else if(base==='router'&&p[1]==='rip')doRIPEnter(devId,d,s);
+    else if(base==='spanning-tree')doSTP(devId,d,s,p.slice(1));
+    else if(base==='vlan')doVLANEnter(devId,d,s,p[1]);
+    else if(base==='line')doLineEnter(devId,d,s,rest);
+    else if(base==='username'){push(devId,{t:'lo',v:`Usuario ${p[1]} configurado.`});}
+    else if(base==='service'&&p[1]==='password-encryption'){push(devId,{t:'lo',v:'Cifrado de contraseñas habilitado.'});}
+    else if(base==='no')doNo(devId,d,s,rest);
+    else if(base==='do')doShow(devId,d,s,rest);
+    else if(base==='end'){s.mode='priv';push(devId,{t:'lo',v:'Saliendo de modo configuración...'});}
+    else if(base==='exit'){s.mode='priv';}
+    else if(base==='cdp'){
+      if(p[1]==='run')d.cdp.enabled=true;
+      if(all.includes('no cdp'))d.cdp.enabled=false;
+      push(devId,{t:'lo',v:`CDP ${d.cdp.enabled?'habilitado':'deshabilitado'}.`});
+    }
+    else unkCmd(devId,cmd);
+    refreshCLI(devId);return;
+  }
+
+  // ── MODE: INTERFACE ──
+  if(s.mode==='iface'){
+    const iface=s.ifaceCtx;
+    if(!iface){s.mode='config';refreshCLI(devId);return;}
+    if(all.startsWith('ip address')){
+      const parts=all.replace('ip address','').trim().split(/\s+/);
+      iface.ip=parts[0]||'';
+      if(parts[1]&&parts[1].includes('.')){iface.mask=parts[1];iface.cidr=mask2cidr(iface.mask);}
+      else if(parts[1]){iface.cidr=parseInt(parts[1]);iface.mask=cidr2mask(iface.cidr);}
+      push(devId,{t:'lo',v:`IP configurada: ${iface.ip}/${iface.cidr} en ${iface.name}`});
+    }
+    else if(all==='no shutdown'||all==='no shut'){iface.status='up';push(devId,{t:'lo',v:`${iface.name}: Link is up, line protocol is up`});}
+    else if(all==='shutdown'||all==='shut'){iface.status='administratively down';push(devId,{t:'lw',v:`${iface.name}: changed state to administratively down`});}
+    else if(all.startsWith('description')){iface.desc=p.slice(1).join(' ');push(devId,{t:'lo',v:'Descripción configurada.'});}
+    else if(all.startsWith('speed')){iface.speed=p[1]+'Mbps';push(devId,{t:'lo',v:`Speed: ${iface.speed}`});}
+    else if(all.startsWith('duplex')){iface.duplex=p[1];push(devId,{t:'lo',v:`Duplex: ${iface.duplex}`});}
+    else if(all.startsWith('ip nat')){iface.nat=p[2];push(devId,{t:'lo',v:`NAT ${p[2]} configurado en ${iface.name}`});}
+    else if(all.startsWith('ip ospf')){
+      if(p[2]==='cost')iface.ospfCost=parseInt(p[3]);
+      if(p[2]==='priority')iface.ospfPrio=parseInt(p[3]);
+      if(p[2]==='network')iface.ospfNet=p[3];
+      push(devId,{t:'lo',v:`OSPF configurado en ${iface.name}`});
+    }
+    else if(all.startsWith('ip helper-address')){iface.helper=p[2];push(devId,{t:'lo',v:`Helper-address ${p[2]} configurado.`});}
+    else if(all.startsWith('ipv6 address')){iface.ipv6=p[2];push(devId,{t:'lo',v:`IPv6: ${iface.ipv6}`});}
+    else if(all.startsWith('switchport mode')){iface.swMode=p[2];push(devId,{t:'lo',v:`Switchport mode: ${p[2]}`});}
+    else if(all.startsWith('switchport access vlan')){iface.accessVlan=parseInt(p[3]);push(devId,{t:'lo',v:`Access VLAN ${p[3]} asignada.`});}
+    else if(all.startsWith('switchport trunk allowed vlan')){iface.trunkVlans=p.slice(4).join('');push(devId,{t:'lo',v:`Trunk VLANs: ${iface.trunkVlans}`});}
+    else if(all.startsWith('channel-group')){iface.channelGroup=p[1];push(devId,{t:'lo',v:`Channel-group ${p[1]} configurado.`});}
+    else if(all.startsWith('standby')){push(devId,{t:'lo',v:`HSRP configurado: standby ${p.slice(1).join(' ')}`});}
+    else if(base==='no')doIfaceNo(devId,d,s,iface,rest);
+    else if(base==='exit'){s.mode='config';s.ifaceCtx=null;}
+    else if(base==='end'){s.mode='priv';s.ifaceCtx=null;}
+    else if(base==='do')doShow(devId,d,s,rest);
+    else unkCmd(devId,cmd);
+    refreshCLI(devId);return;
+  }
+
+  // ── MODE: OSPF ──
+  if(s.mode==='ospf'){
+    const o=d.routing.ospf;
+    if(all.startsWith('network')){
+      const parts=all.replace('network','').trim().split(/\s+/);
+      const net=parts[0],wild=parts[1],area=parts[parts.length-1];
+      if(!o.networks.includes(net+'/'+wild))o.networks.push(net+'/'+wild);
+      o.enabled=true;
+      push(devId,{t:'lo',v:`OSPF: red ${net} wildcard ${wild} area ${area} configurada.`});
+    }
+    else if(all.startsWith('router-id')){o.rid=p[1];push(devId,{t:'lo',v:`OSPF Router-ID: ${o.rid}`});}
+    else if(all.startsWith('passive-interface')){push(devId,{t:'lo',v:`Passive-interface: ${p[1]}`});}
+    else if(all.startsWith('default-information originate')){push(devId,{t:'lo',v:'Default route redistribuída via OSPF.'});}
+    else if(all.startsWith('area')&&all.includes('stub')){push(devId,{t:'lo',v:`Area ${p[1]} configurada como stub.`});}
+    else if(all.startsWith('area')&&all.includes('nssa')){push(devId,{t:'lo',v:`Area ${p[1]} configurada como NSSA.`});}
+    else if(all.startsWith('redistribute')){push(devId,{t:'lo',v:`Redistribución configurada: ${rest}`});}
+    else if(all.startsWith('neighbor')){o.neighbors.push({ip:p[1],area:p[3]||'0'});push(devId,{t:'lo',v:`Vecino OSPF: ${p[1]}`});}
+    else if(all.startsWith('no')&&all.includes('network')){o.networks=o.networks.filter(n=>!n.includes(p[2]));push(devId,{t:'lo',v:'Red OSPF eliminada.'});}
+    else if(all.startsWith('log-adjacency-changes')){push(devId,{t:'lo',v:'Log de adjacencias OSPF habilitado.'});}
+    else if(base==='exit'){s.mode='config';push(devId,{t:'lm',v:'Saliendo de OSPF...'});}
+    else if(base==='end'){s.mode='priv';}
+    else if(base==='do')doShow(devId,d,s,rest);
+    else unkCmd(devId,cmd);
+    refreshCLI(devId);return;
+  }
+
+  // ── MODE: EIGRP ──
+  if(s.mode==='eigrp'){
+    const e=d.routing.eigrp;
+    if(all.startsWith('network')){
+      const net=p[1];e.networks.push(net);e.enabled=true;
+      push(devId,{t:'lo',v:`EIGRP: red ${net} configurada. ASN: ${e.asn}`});
+    }
+    else if(all.startsWith('no auto-summary')){push(devId,{t:'lo',v:'Auto-summary deshabilitado.'});}
+    else if(all.startsWith('passive-interface')){push(devId,{t:'lo',v:`Passive-interface ${p[1]} configurada.`});}
+    else if(all.startsWith('redistribute')){push(devId,{t:'lo',v:`Redistribución EIGRP: ${rest}`});}
+    else if(all.startsWith('eigrp stub')){push(devId,{t:'lo',v:`EIGRP stub configurado.`});}
+    else if(all.startsWith('variance')){push(devId,{t:'lo',v:`Variance EIGRP: ${p[1]}`});}
+    else if(all.startsWith('traffic-share')){push(devId,{t:'lo',v:`Traffic-share: ${rest}`});}
+    else if(base==='exit'){s.mode='config';}
+    else if(base==='end'){s.mode='priv';}
+    else if(base==='do')doShow(devId,d,s,rest);
+    else unkCmd(devId,cmd);
+    refreshCLI(devId);return;
+  }
+
+  // ── MODE: BGP ──
+  if(s.mode==='bgp'){
+    const b=d.routing.bgp;
+    if(all.startsWith('neighbor')&&all.includes('remote-as')){
+      const ip=p[1],asn=parseInt(p[3]);
+      if(!b.neighbors.find(n=>n.ip===ip))b.neighbors.push({ip,asn,state:'Established',uptime:rand(60,86400)});
+      b.enabled=true;
+      push(devId,{t:'lo',v:`BGP neighbor ${ip} remote-as ${asn} configurado.`});
+    }
+    else if(all.startsWith('neighbor')&&all.includes('update-source')){push(devId,{t:'lo',v:`Update-source: ${rest}`});}
+    else if(all.startsWith('neighbor')&&all.includes('next-hop-self')){push(devId,{t:'lo',v:`Next-hop-self configurado para ${p[1]}`});}
+    else if(all.startsWith('neighbor')&&all.includes('route-map')){push(devId,{t:'lo',v:`Route-map BGP: ${rest}`});}
+    else if(all.startsWith('neighbor')&&all.includes('password')){push(devId,{t:'lo',v:`BGP MD5 password configurado.`});}
+    else if(all.startsWith('network')){
+      const net=p[1],mask=p[2]||cidr2mask(24);
+      b.networks.push({net,mask});b.enabled=true;
+      push(devId,{t:'lo',v:`BGP: red ${net} mask ${mask} configurada.`});
+    }
+    else if(all.startsWith('redistribute')){push(devId,{t:'lo',v:`Redistribución BGP: ${rest}`});}
+    else if(all.startsWith('aggregate-address')){push(devId,{t:'lo',v:`Aggregate BGP: ${rest}`});}
+    else if(all.startsWith('maximum-paths')){push(devId,{t:'lo',v:`Maximum-paths BGP: ${p[1]}`});}
+    else if(all.startsWith('bgp router-id')){b.rid=p[2];push(devId,{t:'lo',v:`BGP Router-ID: ${b.rid}`});}
+    else if(all.startsWith('bgp log-neighbor-changes')){push(devId,{t:'lo',v:'BGP log-neighbor-changes habilitado.'});}
+    else if(base==='exit'){s.mode='config';}
+    else if(base==='end'){s.mode='priv';}
+    else if(base==='do')doShow(devId,d,s,rest);
+    else unkCmd(devId,cmd);
+    refreshCLI(devId);return;
+  }
+
+  // ── MODE: VLAN ──
+  if(s.mode==='vlan'){
+    if(base==='name'){const v=s.vlanCtx;if(v)v.name=rest;push(devId,{t:'lo',v:`VLAN name: ${rest}`});}
+    else if(all==='no shutdown'){const v=s.vlanCtx;if(v)v.status='active';push(devId,{t:'lo',v:'VLAN activa.'});}
+    else if(all==='shutdown'){const v=s.vlanCtx;if(v)v.status='suspend';push(devId,{t:'lw',v:'VLAN suspendida.'});}
+    else if(base==='state'){const v=s.vlanCtx;if(v)v.status=p[1];push(devId,{t:'lo',v:`VLAN state: ${p[1]}`});}
+    else if(base==='exit'){s.mode='config';s.vlanCtx=null;}
+    else if(base==='end'){s.mode='priv';s.vlanCtx=null;}
+    else unkCmd(devId,cmd);
+    refreshCLI(devId);return;
+  }
+
+  // ── MODE: LINE ──
+  if(s.mode==='line'){
+    if(all.startsWith('transport input')){push(devId,{t:'lo',v:`Transport input: ${rest.replace('transport input','')}`.trim()});}
+    else if(all.startsWith('login local')){push(devId,{t:'lo',v:'Login local configurado.'});}
+    else if(all.startsWith('login')){push(devId,{t:'lo',v:'Login configurado.'});}
+    else if(all.startsWith('password')){push(devId,{t:'lo',v:`Password de línea configurado.`});}
+    else if(all.startsWith('exec-timeout')){push(devId,{t:'lo',v:`Exec-timeout: ${p[1]} ${p[2]||0} seg.`});}
+    else if(all.startsWith('logging synchronous')){push(devId,{t:'lo',v:'Logging synchronous habilitado.'});}
+    else if(base==='exit'){s.mode='config';}
+    else if(base==='end'){s.mode='priv';}
+    else unkCmd(devId,cmd);
+    refreshCLI(devId);return;
+  }
+
+  // ── MODE: DHCP ──
+  if(s.mode==='dhcp'){
+    const pool=s.dhcpCtx;
+    if(all.startsWith('network')){if(pool){pool.network=p[1];pool.mask=p[2]||cidr2mask(24);}push(devId,{t:'lo',v:`DHCP network: ${p[1]} ${p[2]||''}`});}
+    else if(all.startsWith('default-router')){if(pool)pool.gw=p[1];push(devId,{t:'lo',v:`Default-router: ${p[1]}`});}
+    else if(all.startsWith('dns-server')){if(pool)pool.dns=p.slice(1);push(devId,{t:'lo',v:`DNS: ${p.slice(1).join(', ')}`});}
+    else if(all.startsWith('domain-name')){if(pool)pool.domain=p[1];push(devId,{t:'lo',v:`Domain: ${p[1]}`});}
+    else if(all.startsWith('lease')){if(pool)pool.lease=p.slice(1).join(' ');push(devId,{t:'lo',v:`Lease: ${pool?.lease}`});}
+    else if(all.startsWith('range')){if(pool){pool.rangeStart=p[1];pool.rangeEnd=p[2];}push(devId,{t:'lo',v:`Range: ${p[1]} - ${p[2]}`});}
+    else if(base==='exit'){s.mode='config';s.dhcpCtx=null;}
+    else if(base==='end'){s.mode='priv';s.dhcpCtx=null;}
+    else unkCmd(devId,cmd);
+    refreshCLI(devId);return;
+  }
+
+  unkCmd(devId,cmd);
+  refreshCLI(devId);
+}
+
+// ─── SUB-COMMAND HANDLERS ───────────────────────────────
+
+function doIfaceEnter(devId,d,s,rest){
+  const p=rest.trim().toLowerCase();
+  let iface=d.interfaces.find(i=>i.name.toLowerCase()===p||i.shortName.toLowerCase()===p||i.name.toLowerCase().startsWith(p));
+  if(!iface){
+    // Create subinterface or loopback
+    if(p.startsWith('loopback')){
+      const num=parseInt(p.replace('loopback',''))||0;
+      iface={name:'Loopback'+num,shortName:'lo'+num,ip:'',cidr:32,mask:cidr2mask(32),desc:'Loopback',status:'up',mac:randMAC(),speed:'—',duplex:'—',inPkts:0,outPkts:0,inBytes:0,outBytes:0,errors:0};
+      d.interfaces.push(iface);
+      push(devId,{t:'lo',v:`Interfaz Loopback${num} creada.`});
+    } else if(p.includes('.')){
+      const base2=p.split('.')[0];
+      const parent=d.interfaces.find(i=>i.name.toLowerCase().startsWith(base2));
+      iface={name:rest.trim(),shortName:rest.trim(),ip:'',cidr:24,mask:cidr2mask(24),desc:'Subinterface',status:'up',mac:randMAC(),speed:parent?.speed||'1000Mbps',duplex:'Full',inPkts:0,outPkts:0,inBytes:0,outBytes:0,errors:0,encap:'dot1q'};
+      d.interfaces.push(iface);
+      push(devId,{t:'lo',v:`Subinterfaz ${rest.trim()} creada.`});
+    } else {
+      push(devId,{t:'le',v:`Interfaz no encontrada: ${rest}. Use Tab para autocompletar.`});
+      return;
+    }
+  }
+  s.ifaceCtx=iface;s.mode='iface';
+  push(devId,{t:'lo',v:`Configurando: ${iface.name} (${iface.status})`});
+}
+
+function doIfaceNo(devId,d,s,iface,rest){
+  if(rest.startsWith('ip address')){iface.ip='';iface.cidr=24;iface.mask='';push(devId,{t:'lo',v:'IP eliminada.'});}
+  else if(rest==='shutdown'){iface.status='up';push(devId,{t:'lo',v:`${iface.name}: Up`});}
+  else if(rest.startsWith('description')){iface.desc='';push(devId,{t:'lo',v:'Descripción eliminada.'});}
+  else push(devId,{t:'lo',v:`No ${rest} aplicado.`});
+}
+
+function doStaticRoute(devId,d,s,args){
+  if(args.length<3){push(devId,{t:'le',v:'Uso: ip route <dst> <mask> <next-hop> [ad]'});return;}
+  const dst=args[0],mask=args[1],nh=args[2],ad=parseInt(args[3])||1;
+  d.routing.static.push({dst,mask,nh,ad,iface:args[3]&&isNaN(args[3])?args[3]:''});
+  push(devId,{t:'lo',v:`Ruta estática: ${dst} ${mask} via ${nh} AD:${ad}`});
+}
+
+function doDHCPConfig(devId,d,s,args){
+  const sub=args[0];
+  if(sub==='excluded-address'){d.dhcp.excluded.push(args[1]);if(args[2])d.dhcp.excluded.push(args[2]);push(devId,{t:'lo',v:`Excluido: ${args.slice(1).join(' ')}`});}
+  else if(sub==='pool'){
+    const pool={name:args[1],network:'',mask:'',gw:'',dns:[],domain:'',lease:'1',rangeStart:'',rangeEnd:''};
+    d.dhcp.pools.push(pool);s.dhcpCtx=pool;s.mode='dhcp';
+    push(devId,{t:'lo',v:`Pool DHCP: ${args[1]} creado.`});
+  }
+  else push(devId,{t:'lo',v:`DHCP: ${args.join(' ')} configurado.`});
+}
+
+function doNATConfig(devId,d,s,args){
+  const sub=args[0];
+  if(sub==='inside'&&args[1]==='source'){
+    push(devId,{t:'lo',v:`NAT inside source: ${args.slice(2).join(' ')}`});
+  }else if(sub==='pool'){
+    push(devId,{t:'lo',v:`NAT pool: ${args.slice(1).join(' ')}`});
+  }else push(devId,{t:'lo',v:`NAT: ${args.join(' ')}`});
+}
+
+function doACLConfig(devId,d,s,args){
+  const type=args[0],name=args[1];
+  push(devId,{t:'lo',v:`ACL ${type} ${name} configurada.`});
+  s.aclCtx={type,name};s.mode='acl';
+}
+
+function doOSPFEnter(devId,d,s,pid){
+  if(!DC[d.type].canRoute){push(devId,{t:'le',v:'OSPF solo disponible en routers.'});return;}
+  d.routing.ospf.pid=parseInt(pid)||1;d.routing.ospf.enabled=true;s.mode='ospf';
+  push(devId,{t:'lo',v:`Configurando OSPF PID: ${d.routing.ospf.pid}`});
+}
+function doEIGRPEnter(devId,d,s,asn){
+  if(!DC[d.type].canRoute){push(devId,{t:'le',v:'EIGRP solo disponible en routers.'});return;}
+  d.routing.eigrp.asn=parseInt(asn)||100;d.routing.eigrp.enabled=true;s.mode='eigrp';
+  push(devId,{t:'lo',v:`Configurando EIGRP ASN: ${d.routing.eigrp.asn}`});
+}
+function doBGPEnter(devId,d,s,asn){
+  if(!DC[d.type].canRoute){push(devId,{t:'le',v:'BGP solo disponible en routers.'});return;}
+  d.routing.bgp.asn=parseInt(asn)||65000;d.routing.bgp.enabled=true;s.mode='bgp';
+  push(devId,{t:'lo',v:`Configurando BGP ASN: ${d.routing.bgp.asn}`});
+}
+function doRIPEnter(devId,d,s){
+  s.mode='ospf'; // reuse router mode
+  push(devId,{t:'lo',v:'Configurando RIP. Use network <ip> y no auto-summary.'});
+}
+function doSTP(devId,d,s,args){
+  if(args[0]==='mode'){d.stp.mode=args[1];push(devId,{t:'lo',v:`STP mode: ${args[1]}`});}
+  else if(args[0]==='vlan'&&args[2]==='priority'){push(devId,{t:'lo',v:`STP priority VLAN ${args[1]}: ${args[3]}`});}
+  else if(args[0]==='portfast'){push(devId,{t:'lo',v:'PortFast habilitado globalmente.'});}
+  else push(devId,{t:'lo',v:`Spanning-tree: ${args.join(' ')}`});
+}
+function doVLANEnter(devId,d,s,vid){
+  if(d.type!=='switch'){push(devId,{t:'le',v:'VLANs solo en switches.'});return;}
+  let vlan=d.vlans.find(v=>v.id===parseInt(vid));
+  if(!vlan){vlan={id:parseInt(vid),name:'VLAN'+vid,ports:[],status:'active'};d.vlans.push(vlan);}
+  s.vlanCtx=vlan;s.mode='vlan';
+  push(devId,{t:'lo',v:`Configurando VLAN ${vid} — ${vlan.name}`});
+}
+function doLineEnter(devId,d,s,rest){s.mode='line';push(devId,{t:'lo',v:`Configurando línea: ${rest}`});}
+function doNo(devId,d,s,rest){
+  if(rest.startsWith('ip route')){const p=rest.split(/\s+/);d.routing.static=d.routing.static.filter(r=>r.dst!==p[2]);push(devId,{t:'lo',v:`Ruta ${p[2]} eliminada.`});}
+  else if(rest.startsWith('router ospf')){d.routing.ospf.enabled=false;d.routing.ospf.networks=[];push(devId,{t:'lw',v:'OSPF deshabilitado.'});}
+  else if(rest.startsWith('router eigrp')){d.routing.eigrp.enabled=false;d.routing.eigrp.networks=[];push(devId,{t:'lw',v:'EIGRP deshabilitado.'});}
+  else if(rest.startsWith('router bgp')){d.routing.bgp.enabled=false;push(devId,{t:'lw',v:'BGP deshabilitado.'});}
+  else if(rest.startsWith('ip dhcp pool')){const n=rest.split(/\s+/)[3];d.dhcp.pools=d.dhcp.pools.filter(p=>p.name!==n);push(devId,{t:'lo',v:`Pool ${n} eliminado.`});}
+  else push(devId,{t:'lo',v:`no ${rest} aplicado.`});
+}
+
+// ─── DEBUG ─────────────────────────────────────────────
+function doDebug(devId,d,s,rest){
+  const msgs={
+    'ip ospf':  'OSPF: Sending Hello on GigabitEthernet0/0, area 0',
+    'ip eigrp': 'EIGRP: Sending UPDATE metric 28160 via GigabitEthernet0/0',
+    'ip bgp':   'BGP: Rcvd KEEPALIVE from neighbor 10.0.0.2',
+    'ip icmp':  'ICMP: echo reply sent, src 10.0.0.1, dst 192.168.1.1',
+    'ip packet':'IP: s=10.0.0.1 d=192.168.1.1 id=0x4500, len 60, proto=icmp',
+    'spanning-tree':'STP: port Fa0/1 -> forwarding on VLAN1',
+  };
+  const key=Object.keys(msgs).find(k=>rest.startsWith(k));
+  if(key){
+    push(devId,{t:'lw',v:`DEBUG ${rest.toUpperCase()} habilitado.`});
+    push(devId,{t:'lm',v:`*${new Date().toLocaleTimeString()}: ${msgs[key]}`});
+    setTimeout(()=>{push(devId,{t:'lm',v:`*${new Date().toLocaleTimeString()}: ${msgs[key]}`});refreshCLI(devId);},1200);
+    setTimeout(()=>{push(devId,{t:'lm',v:`*${new Date().toLocaleTimeString()}: ${msgs[key]}`});refreshCLI(devId);},2400);
+  }else push(devId,{t:'li',v:`debug ${rest} — Use undebug all para detener.`});
+}
+
+function doClear(devId,d,s,rest){
+  if(rest.startsWith('ip ospf')){d.routing.ospf.neighbors=[];push(devId,{t:'li',v:'Adjacencias OSPF reseteadas.'});}
+  else if(rest.startsWith('ip bgp')){push(devId,{t:'li',v:'Sesiones BGP reseteadas.'});}
+  else if(rest.startsWith('arp')){push(devId,{t:'li',v:'Tabla ARP limpiada.'});}
+  else if(rest.startsWith('counters')){d.interfaces.forEach(i=>{i.inPkts=0;i.outPkts=0;i.inBytes=0;i.outBytes=0;i.errors=0;});push(devId,{t:'li',v:'Contadores limpiados.'});}
+  else if(rest===''||rest==='screen'){sessions[devId].lines=[];push(devId,{t:'lm',v:'Pantalla limpiada.'});}
+  else push(devId,{t:'li',v:`clear ${rest} ejecutado.`});
+}
+
+// ─── SHOW COMMANDS ─────────────────────────────────────
+function doShow(devId,d,s,sub){
+  const t=sub.toLowerCase().trim();
+
+  if(t===''||t==='?'){showHelp(devId,s);return;}
+
+  // ── show ip interface brief ──
+  if(t==='ip int brief'||t==='ip interface brief'||t==='ip int br'||t==='ip interfaces'){
+    const hdr='Interface              IP-Address      OK? Method Status     Protocol';
+    push(devId,{t:'lt',v:hdr});
+    push(devId,{t:'lm',v:'─'.repeat(hdr.length)});
+    d.interfaces.forEach(i=>{
+      const ip=(i.ip||'unassigned').padEnd(16);
+      const ok=i.ip?'YES':'NO ';
+      const st=i.status==='up'?'up                 up':'administratively down  down';
+      push(devId,{t:'lo',v:`${i.name.padEnd(23)}${ip}${ok}  manual  ${st}`});
+    });
+    return;
+  }
+
+  // ── show interfaces ──
+  if(t==='interfaces'||t.startsWith('interfaces ')||t==='interface'||t.startsWith('interface ')){
+    const filterName=t.split(/\s+/).slice(1).join(' ').toLowerCase();
+    const ifList=filterName?d.interfaces.filter(i=>i.name.toLowerCase().includes(filterName)||i.shortName.toLowerCase().includes(filterName)):d.interfaces;
+    ifList.forEach(i=>{
+      const updown=i.status==='up';
+      push(devId,{t:updown?'lt':'lw',v:`${i.name} is ${i.status}, line protocol is ${updown?'up':'down'}`});
+      push(devId,{t:'lo',v:`  Hardware is Gigabit Ethernet, address is ${i.mac}`});
+      if(i.desc)push(devId,{t:'lm',v:`  Description: ${i.desc}`});
+      if(i.ip)push(devId,{t:'lo',v:`  Internet address is ${i.ip}/${i.cidr}`});
+      else push(devId,{t:'lm',v:'  Internet address is unassigned'});
+      push(devId,{t:'lm',v:`  MTU 1500 bytes, BW ${i.speed==='1000Mbps'?'1000000':i.speed==='100Mbps'?'100000':'10000'} Kbit/sec`});
+      push(devId,{t:'lm',v:`  ${i.duplex}-duplex, ${i.speed}, link type is auto`});
+      push(devId,{t:'lm',v:`  Input queue: 0/75/0/0 (size/max/drops/flushes)`});
+      push(devId,{t:'lm',v:`  ${i.inPkts+rand(1000,9999)} packets input, ${i.inBytes+rand(10000,999999)} bytes`});
+      push(devId,{t:'lm',v:`  ${i.outPkts+rand(1000,9999)} packets output, ${i.outBytes+rand(10000,999999)} bytes`});
+      push(devId,{t:'lm',v:`  ${i.errors} input errors, 0 CRC, 0 frame`});
+      push(devId,{t:'lm',v:''});
+    });
+    return;
+  }
+
+  // ── show ip route ──
+  if(t==='ip route'||t==='ip routing'||t==='ip route summary'){
+    push(devId,{t:'lt',v:'Codes: C-connected, S-static, O-OSPF, E-EIGRP, B-BGP, R-RIP, L-local'});
+    push(devId,{t:'lm',v:'       [admin-distance/metric] via next-hop'});push(devId,{t:'lm',v:''});
+    let hasRoutes=false;
+    d.interfaces.filter(i=>i.ip&&i.status==='up').forEach(i=>{
+      const net=ipNet(i.ip,cidr2mask(i.cidr));
+      push(devId,{t:'lo',v:`C    ${net}/${i.cidr} is directly connected, ${i.name}`});
+      push(devId,{t:'lo',v:`L    ${i.ip}/32 is directly connected, ${i.name}`});
+      hasRoutes=true;
+    });
+    d.routing.static.forEach(r=>{
+      push(devId,{t:'lo',v:`S${r.dst==='0.0.0.0'?'*':''}   ${r.dst}/${mask2cidr(r.mask)} [${r.ad}/0] via ${r.nh}`});
+      hasRoutes=true;
+    });
+    if(d.routing.ospf.enabled){
+      d.routing.ospf.networks.forEach(n=>{
+        push(devId,{t:'lo',v:`O    ${n} [110/${rand(10,200)}] via ${d.interfaces[0]?.ip||'—'}, OSPF process ${d.routing.ospf.pid}`});
+        hasRoutes=true;
+      });
+      // Routes learned from neighbors
+      const ospfPeers=links.filter(l=>l.from===d.id||l.to===d.id).map(l=>byId(l.from===d.id?l.to:l.from)).filter(p=>p&&p.routing?.ospf?.enabled);
+      ospfPeers.forEach(p=>{p.interfaces.filter(i=>i.ip&&i.status==='up').forEach(i=>{push(devId,{t:'lo',v:`O    ${ipNet(i.ip,cidr2mask(i.cidr))}/${i.cidr} [110/${rand(10,100)}] via ${p.interfaces[0]?.ip||'—'}, ${p.name}`});hasRoutes=true;});});
+    }
+    if(d.routing.eigrp.enabled){
+      d.routing.eigrp.networks.forEach(n=>{push(devId,{t:'lo',v:`D    ${n} [90/${rand(100000,3000000)}] via ${d.interfaces[0]?.ip||'—'}`});hasRoutes=true;});
+    }
+    if(d.routing.bgp.enabled){
+      d.routing.bgp.networks.forEach(n=>{push(devId,{t:'lo',v:`B    ${n.net}/${mask2cidr(n.mask)} [200/${rand(0,200)}] via ${d.routing.bgp.neighbors[0]?.ip||'—'}`});hasRoutes=true;});
+    }
+    if(!hasRoutes)push(devId,{t:'lm',v:'  (No hay rutas en la tabla)'});
+    return;
+  }
+
+  // ── show ip ospf ──
+  if(t==='ip ospf'||t.startsWith('ip ospf')){
+    const o=d.routing.ospf;
+    if(!o.enabled){push(devId,{t:'le',v:'OSPF no está configurado en este dispositivo.'});return;}
+    push(devId,{t:'lt',v:`Routing Process "ospf ${o.pid}" with ID ${o.rid||d.interfaces[0]?.ip||'1.1.1.1'}`});
+    push(devId,{t:'lo',v:`  Start time: ${fmtUptime(rand(60,86400))}, Time elapsed: ${fmtUptime(rand(60,d.uptime))}`});
+    push(devId,{t:'lo',v:`  Supports only single TOS(TOS0) routes`});
+    push(devId,{t:'lo',v:`  SPF algorithm last executed ${rand(1,300)} seconds ago`});
+    push(devId,{t:'lo',v:`  Number of areas in this router is 1: 1 normal`});
+    push(devId,{t:'lo',v:`  Number of interfaces in this area is ${d.interfaces.filter(i=>i.status==='up').length}`});
+    push(devId,{t:'lo',v:`  Redes anunciadas: ${o.networks.join(', ')||'ninguna'}`});
+    if(t.includes('neighbor')){
+      push(devId,{t:'lt',v:'\nVecinos OSPF:'});
+      const peers=links.filter(l=>l.from===d.id||l.to===d.id).map(l=>byId(l.from===d.id?l.to:l.from)).filter(p=>p&&p.routing?.ospf?.enabled);
+      if(!peers.length)push(devId,{t:'lm',v:'  No hay vecinos OSPF.'});
+      peers.forEach(p=>{push(devId,{t:'lo',v:`  ${(p.routing.ospf.rid||p.interfaces[0]?.ip||'?').padEnd(16)} ${fmtUptime(rand(60,3600))}  FULL/DR  ${p.interfaces[0]?.ip||'—'}`});});
+    }
+    if(t.includes('database')||t.includes('data')){
+      push(devId,{t:'lt',v:'\nOSPF Link State Database:'});
+      push(devId,{t:'lm',v:'Type       LS ID        ADV Router   Age   Seq#      Checksum'});
+      push(devId,{t:'lo',v:`Router     ${d.interfaces[0]?.ip?.padEnd(13)||'—'}${(o.rid||d.interfaces[0]?.ip||'1.1.1.1').padEnd(14)}${rand(1,1800)}   0x${rand(0x80000001,0x80000fff).toString(16)}  0x${rand(0x1000,0xffff).toString(16)}`});
+    }
+    return;
+  }
+
+  // ── show ip eigrp ──
+  if(t.startsWith('ip eigrp')){
+    const e=d.routing.eigrp;
+    if(!e.enabled){push(devId,{t:'le',v:'EIGRP no configurado.'});return;}
+    if(t.includes('neighbor')){
+      push(devId,{t:'lt',v:`EIGRP-IPv4 Neighbors for AS(${e.asn})`});
+      push(devId,{t:'lm',v:'H  Address           Interface  Hold Uptime SRTT RTO Q Seq'});
+      const peers=links.filter(l=>l.from===d.id||l.to===d.id).map(l=>byId(l.from===d.id?l.to:l.from)).filter(p=>p&&p.routing?.eigrp?.enabled);
+      if(!peers.length)push(devId,{t:'lm',v:'  No hay vecinos EIGRP.'});
+      peers.forEach((p,i)=>{push(devId,{t:'lo',v:`${i}  ${(p.interfaces[0]?.ip||'—').padEnd(17)}${d.interfaces[0]?.name.slice(0,10)||'Gi0/0'}      ${rand(10,15)}    ${fmtUptime(rand(60,3600))}  ${rand(1,200)}  ${rand(100,5000)}  0  ${rand(1,200)}`});});
+    }
+    else if(t.includes('topology')){
+      push(devId,{t:'lt',v:`EIGRP-IPv4 Topology Table for AS(${e.asn})`});
+      push(devId,{t:'lo',v:`Codes: P-Passive, A-Active, U-Update, Q-Query, R-Reply`});
+      e.networks.forEach(n=>{push(devId,{t:'lo',v:`P ${n}, 1 successors, FD is ${rand(100000,3000000)}`});});
+    }
+    else{
+      push(devId,{t:'lt',v:`EIGRP AS: ${e.asn} — Redes: ${e.networks.join(', ')||'—'}`});
+    }
+    return;
+  }
+
+  // ── show ip bgp ──
+  if(t.startsWith('ip bgp')||t==='bgp'||t.startsWith('bgp')){
+    const b=d.routing.bgp;
+    if(!b.enabled){push(devId,{t:'le',v:'BGP no configurado.'});return;}
+    if(t.includes('summary')){
+      push(devId,{t:'lt',v:`BGP router identifier ${b.rid||d.interfaces[0]?.ip||'—'}, local AS number ${b.asn}`});
+      push(devId,{t:'lo',v:`BGP table version is ${rand(1,50)}, main routing table version ${rand(1,50)}`});
+      push(devId,{t:'lm',v:''});
+      push(devId,{t:'lt',v:'Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd'});
+      if(!b.neighbors.length)push(devId,{t:'lm',v:'  No hay vecinos BGP configurados.'});
+      b.neighbors.forEach(n=>{push(devId,{t:'lo',v:`${n.ip.padEnd(16)}4  ${String(n.asn).padEnd(6)}${rand(100,9999).toString().padEnd(8)}${rand(100,9999).toString().padEnd(8)}${rand(1,50).toString().padEnd(8)}   0    0 ${fmtUptime(n.uptime||3600)}  ${rand(0,50)}`});});
+    }
+    else if(t.includes('neighbor')){
+      push(devId,{t:'lt',v:`BGP neighbor summary — AS ${b.asn}`});
+      b.neighbors.forEach(n=>{
+        push(devId,{t:'lo',v:`BGP neighbor is ${n.ip}, remote AS ${n.asn}, external link`});
+        push(devId,{t:'lo',v:`  BGP state = Established, up for ${fmtUptime(n.uptime||3600)}`});
+        push(devId,{t:'lo',v:`  Hold time is ${rand(30,180)}, keepalive interval is ${rand(10,60)} seconds`});
+        push(devId,{t:'lm',v:`  Message statistics: Open/Keepalive/Update/Notification/Total`});
+      });
+    }
+    else{
+      push(devId,{t:'lt',v:`BGP Table — AS ${b.asn}`});
+      push(devId,{t:'lm',v:'Network          Next Hop     Metric LocPrf Weight Path'});
+      b.networks.forEach(n=>{push(devId,{t:'lo',v:`*> ${n.net.padEnd(17)}${(b.neighbors[0]?.ip||'0.0.0.0').padEnd(13)}${rand(0,200).toString().padEnd(7)}${rand(0,200).toString().padEnd(7)}${rand(0,65535).toString().padEnd(7)}i`});});
+      if(!b.networks.length)push(devId,{t:'lm',v:'  No hay redes BGP.'});
+    }
+    return;
+  }
+
+  // ── show arp ──
+  if(t==='arp'||t==='ip arp'){
+    push(devId,{t:'lt',v:'Protocol  Address         Age(min)  Hardware Addr    Type    Interface'});
+    push(devId,{t:'lm',v:'─'.repeat(72)});
+    d.interfaces.filter(i=>i.ip).forEach(i=>{
+      push(devId,{t:'lo',v:`Internet  ${i.ip.padEnd(16)}-         ${i.mac}    ARPA    ${i.name}`});
+    });
+    const peers=links.filter(l=>l.from===d.id||l.to===d.id).map(l=>byId(l.from===d.id?l.to:l.from)).filter(Boolean);
+    peers.forEach(p=>{
+      const pi=p.interfaces.find(i=>i.ip&&i.status==='up');
+      if(pi)push(devId,{t:'lo',v:`Internet  ${pi.ip.padEnd(16)}${rand(1,120)}         ${pi.mac}    ARPA    ${d.interfaces[0]?.name||'—'}`});
+    });
+    return;
+  }
+
+  // ── show vlan ──
+  if(t==='vlan'||t==='vlan brief'||t==='vlan all'){
+    if(d.type!=='switch'){push(devId,{t:'le',v:'Disponible solo en switches.'});return;}
+    push(devId,{t:'lt',v:'VLAN  Name                   Status    Ports'});
+    push(devId,{t:'lm',v:'─'.repeat(70)});
+    d.vlans.forEach(v=>{
+      const ports=v.ports.join(', ')||d.interfaces.slice(0,3).map(i=>i.name).join(', ');
+      push(devId,{t:v.status==='active'?'lo':'lw',v:`${String(v.id).padEnd(6)}${v.name.padEnd(23)}${v.status.padEnd(10)}${ports}`});
+    });
+    push(devId,{t:'lm',v:''});
+    push(devId,{t:'lm',v:'1002  fddi-default          act/unsup'});
+    push(devId,{t:'lm',v:'1003  token-ring-default    act/unsup'});
+    return;
+  }
+
+  // ── show mac address-table ──
+  if(t.startsWith('mac')){
+    if(d.type!=='switch'){push(devId,{t:'le',v:'Disponible solo en switches.'});return;}
+    push(devId,{t:'lt',v:'Vlan  Mac Address       Type     Ports'});
+    push(devId,{t:'lm',v:'─'.repeat(50)});
+    links.filter(l=>l.from===d.id||l.to===d.id).forEach((l,i)=>{
+      const peer=byId(l.from===d.id?l.to:l.from);
+      const pi=peer?.interfaces.find(i2=>i2.ip)||peer?.interfaces[0];
+      push(devId,{t:'lo',v:`1     ${randMAC()}  DYNAMIC  ${d.interfaces[Math.min(i,d.interfaces.length-1)]?.name}  (→${peer?.name||'?'})`});
+    });
+    return;
+  }
+
+  // ── show version ──
+  if(t==='version'||t==='ver'){
+    push(devId,{t:'lt',v:`${d.ios}`});
+    push(devId,{t:'lt',v:`NetForge PRO Simulator — ${DC[d.type].label}`});
+    push(devId,{t:'lm',v:''});
+    push(devId,{t:'lo',v:`ROM: System Bootstrap, Version 15.1(4)M4`});
+    push(devId,{t:'lo',v:`${d.hostname} uptime is ${fmtUptime(d.uptime)}`});
+    push(devId,{t:'lo',v:`System image file is "flash:${d.ios.toLowerCase().replace(/ /g,'-')}.bin"`});
+    push(devId,{t:'lo',v:`Processor board ID FTX${rand(1000000,9999999)}`});
+    push(devId,{t:'lo',v:`${DC[d.type].ifaceCount} GigabitEthernet interfaces`});
+    push(devId,{t:'lo',v:`${rand(128,512)}K bytes of physical memory.`});
+    push(devId,{t:'lo',v:`${rand(50,250)}M bytes of flash.`});
+    push(devId,{t:'lm',v:''});
+    push(devId,{t:'lo',v:`Configuration register is 0x2102`});
+    return;
+  }
+
+  // ── show running-config / startup-config ──
+  if(t==='running-config'||t==='run'||t==='startup-config'||t==='start'){
+    push(devId,{t:'lt',v:`! =============================================`});
+    push(devId,{t:'lt',v:`! ${t==='running-config'||t==='run'?'Current':'Startup'} configuration — ${d.name}`});
+    push(devId,{t:'lt',v:`! =============================================`});
+    push(devId,{t:'lo',v:`version 15.7`});
+    push(devId,{t:'lo',v:`service password-encryption`});
+    push(devId,{t:'lo',v:`!`});
+    push(devId,{t:'lo',v:`hostname ${d.hostname}`});
+    if(d.secret)push(devId,{t:'lo',v:`enable secret 5 ${md5fake(d.secret)}`});
+    if(d.banner)push(devId,{t:'lo',v:`banner motd ^${d.banner}^`});
+    push(devId,{t:'lo',v:`!`});
+    d.interfaces.forEach(i=>{
+      push(devId,{t:'lo',v:`interface ${i.name}`});
+      if(i.desc)push(devId,{t:'lo',v:` description ${i.desc}`});
+      if(i.ip){push(devId,{t:'lo',v:` ip address ${i.ip} ${i.mask||cidr2mask(i.cidr)}`});}
+      else push(devId,{t:'lm',v:` no ip address`});
+      if(i.status==='administratively down')push(devId,{t:'lo',v:` shutdown`});
+      else push(devId,{t:'lo',v:` no shutdown`});
+      push(devId,{t:'lo',v:`!`});
+    });
+    d.routing.static.forEach(r=>{push(devId,{t:'lo',v:`ip route ${r.dst} ${r.mask} ${r.nh} ${r.ad!==1?r.ad:''}`});});
+    if(d.routing.ospf.enabled){
+      push(devId,{t:'lo',v:`!`});
+      push(devId,{t:'lo',v:`router ospf ${d.routing.ospf.pid}`});
+      if(d.routing.ospf.rid)push(devId,{t:'lo',v:` router-id ${d.routing.ospf.rid}`});
+      d.routing.ospf.networks.forEach(n=>{push(devId,{t:'lo',v:` network ${n.split('/')[0]} 0.0.0.255 area 0`});});
+      push(devId,{t:'lo',v:`!`});
+    }
+    if(d.routing.eigrp.enabled){
+      push(devId,{t:'lo',v:`!`});
+      push(devId,{t:'lo',v:`router eigrp ${d.routing.eigrp.asn}`});
+      d.routing.eigrp.networks.forEach(n=>{push(devId,{t:'lo',v:` network ${n}`});});
+      push(devId,{t:'lo',v:` no auto-summary`});
+      push(devId,{t:'lo',v:`!`});
+    }
+    if(d.routing.bgp.enabled){
+      push(devId,{t:'lo',v:`!`});
+      push(devId,{t:'lo',v:`router bgp ${d.routing.bgp.asn}`});
+      d.routing.bgp.neighbors.forEach(n=>{push(devId,{t:'lo',v:` neighbor ${n.ip} remote-as ${n.asn}`});});
+      d.routing.bgp.networks.forEach(n=>{push(devId,{t:'lo',v:` network ${n.net} mask ${n.mask}`});});
+      push(devId,{t:'lo',v:`!`});
+    }
+    if(d.type==='switch'){
+      push(devId,{t:'lo',v:`spanning-tree mode ${d.stp.mode}`});
+      push(devId,{t:'lo',v:`!`});
+      d.vlans.forEach(v=>{push(devId,{t:'lo',v:`vlan ${v.id}\n name ${v.name}`});});
+      push(devId,{t:'lo',v:`!`});
+    }
+    d.dhcp.pools.forEach(p=>{
+      push(devId,{t:'lo',v:`ip dhcp pool ${p.name}`});
+      if(p.network)push(devId,{t:'lo',v:` network ${p.network} ${p.mask}`});
+      if(p.gw)push(devId,{t:'lo',v:` default-router ${p.gw}`});
+      if(p.dns?.length)push(devId,{t:'lo',v:` dns-server ${p.dns.join(' ')}`});
+      push(devId,{t:'lo',v:`!`});
+    });
+    push(devId,{t:'lo',v:`line vty 0 4`});
+    push(devId,{t:'lo',v:` transport input ssh`});
+    push(devId,{t:'lo',v:` login local`});
+    push(devId,{t:'lo',v:`!`});
+    push(devId,{t:'lo',v:`end`});
+    return;
+  }
+
+  // ── show cdp neighbors ──
+  if(t.startsWith('cdp')){
+    push(devId,{t:'lt',v:`CDP neighbor table — ${d.hostname}`});
+    push(devId,{t:'lm',v:'Device ID     Local Iface      Holdtime  Capability  Port ID'});
+    push(devId,{t:'lm',v:'─'.repeat(65)});
+    const peers=links.filter(l=>l.from===d.id||l.to===d.id);
+    if(!peers.length||!d.cdp.enabled)push(devId,{t:'lm',v:'  No hay vecinos CDP.'});
+    peers.forEach(l=>{
+      const peer=byId(l.from===d.id?l.to:l.from);
+      const lIf=l.from===d.id?l.fromIf:l.toIf;
+      const rIf=l.from===d.id?l.toIf:l.fromIf;
+      const cap=peer?DC[peer.type].label.slice(0,1):'R';
+      if(peer)push(devId,{t:'lo',v:`${peer.name.padEnd(14)}${lIf?.slice(0,16)||'Gi0/0'}           ${rand(120,180)}         ${cap}           ${rIf||'Gi0/0'}`});
+    });
+    if(t.includes('detail')){
+      peers.forEach(l=>{
+        const peer=byId(l.from===d.id?l.to:l.from);
+        if(!peer)return;
+        push(devId,{t:'lm',v:''});
+        push(devId,{t:'lt',v:`Device ID: ${peer.name}`});
+        push(devId,{t:'lo',v:`  IOS: ${peer.ios}`});
+        push(devId,{t:'lo',v:`  IP: ${peer.interfaces[0]?.ip||'—'}`});
+        push(devId,{t:'lo',v:`  Platform: Cisco ${DC[peer.type].label}`});
+      });
+    }
+    return;
+  }
+
+  // ── show ip dhcp ──
+  if(t.startsWith('ip dhcp')){
+    if(t.includes('pool')){
+      d.dhcp.pools.forEach(p=>{
+        push(devId,{t:'lt',v:`Pool ${p.name}:`});
+        push(devId,{t:'lo',v:`  Network: ${p.network||'—'} ${p.mask||''}`});
+        push(devId,{t:'lo',v:`  Default-router: ${p.gw||'—'}`});
+        push(devId,{t:'lo',v:`  DNS: ${p.dns?.join(', ')||'—'}`});
+        push(devId,{t:'lo',v:`  Range: ${p.rangeStart||'—'} - ${p.rangeEnd||'—'}`});
+        push(devId,{t:'lo',v:`  Lease: ${p.lease||'1 day'}`});
+      });
+      if(!d.dhcp.pools.length)push(devId,{t:'lm',v:'No hay pools DHCP configurados.'});
+    }
+    else if(t.includes('binding')){
+      push(devId,{t:'lt',v:'IP address      Client-ID             Lease expiration       Type'});
+      d.dhcp.pools.forEach(p=>{
+        if(p.rangeStart){push(devId,{t:'lo',v:`${p.rangeStart.padEnd(17)}${randMAC().padEnd(22)}${new Date(Date.now()+86400000).toLocaleString().padEnd(23)}Automatic`});}
+      });
+      if(!d.dhcp.pools.length)push(devId,{t:'lm',v:'No hay bindings DHCP.'});
+    }
+    return;
+  }
+
+  // ── show spanning-tree ──
+  if(t.startsWith('spanning-tree')||t.startsWith('stp')){
+    if(d.type!=='switch'){push(devId,{t:'le',v:'Solo en switches.'});return;}
+    push(devId,{t:'lt',v:`VLAN0001`});
+    push(devId,{t:'lo',v:`  Spanning tree enabled protocol ${d.stp.mode}`});
+    push(devId,{t:'lo',v:`  Root ID    Priority    ${d.stp.priority}`});
+    push(devId,{t:'lo',v:`             Address     ${randMAC()}`});
+    push(devId,{t:'lo',v:`             ${d.stp.root?'This bridge is the root':'Cost 4, Port 1 (GigabitEthernet0/1)'}`});
+    push(devId,{t:'lo',v:`  Bridge ID  Priority    ${d.stp.priority} (priority ${d.stp.priority-1} sys-id-ext 1)`});
+    push(devId,{t:'lo',v:`             Address     ${d.interfaces[0]?.mac}`});
+    push(devId,{t:'lm',v:''});
+    push(devId,{t:'lm',v:'Interface      Role  Sts  Cost      Prio.Nbr Type'});
+    d.interfaces.slice(0,Math.min(8,d.interfaces.length)).forEach((i,idx)=>{
+      const role=idx===0?'Root':'Desg';
+      const sts=i.status==='up'?'FWD':'BLK';
+      push(devId,{t:'lo',v:`${i.name.padEnd(15)}${role.padEnd(6)}${sts}  ${rand(4,19).toString().padEnd(10)}128.${idx+1}    P2p`});
+    });
+    return;
+  }
+
+  // ── show ip nat ──
+  if(t.startsWith('ip nat')){
+    push(devId,{t:'lt',v:'NAT Translations:'});
+    push(devId,{t:'lm',v:'Pro  Inside global      Inside local       Outside local      Outside global'});
+    if(!d.nat.enabled)push(devId,{t:'lm',v:'  NAT no está habilitado.'});
+    else{
+      for(let i=0;i<rand(2,6);i++){
+        const lip=`192.168.1.${rand(2,254)}`,gip=d.interfaces.find(i2=>i2.ip)?.ip||'—';
+        push(devId,{t:'lo',v:`tcp  ${gip}:${rand(1024,65535)}  ${lip}:${rand(1024,65535)}  ${rand(1,200)}.${rand(1,200)}.${rand(1,200)}.${rand(1,200)}:80  same`});
+      }
+    }
+    return;
+  }
+
+  // ── show access-lists ──
+  if(t.startsWith('access-list')||t.startsWith('access-lists')||t.startsWith('ip access')){
+    push(devId,{t:'lt',v:'Access Lists configuradas:'});
+    if(!d.acls.length)push(devId,{t:'lm',v:'  No hay ACLs configuradas.'});
+    d.acls.forEach(a=>{push(devId,{t:'lo',v:`${a.type} access list ${a.name}`});});
+    return;
+  }
+
+  // ── show clock ──
+  if(t==='clock'||t==='clock detail'){
+    push(devId,{t:'lo',v:`${new Date().toLocaleTimeString('es',{hour12:false})} ${new Date().toLocaleDateString('es')} — ${d.hostname}`});
+    return;
+  }
+
+  // ── show users / sessions ──
+  if(t==='users'||t==='line'){
+    push(devId,{t:'lt',v:'    Line       User       Host(s)              Idle       Location'});
+    push(devId,{t:'lo',v:`*   0 con 0    admin      idle                 00:00:00`});
+    push(devId,{t:'lo',v:`    1 vty 0    admin      idle                 00:00:05   127.0.0.1`});
+    return;
+  }
+
+  // ── show processes ──
+  if(t.startsWith('processes')){
+    push(devId,{t:'lt',v:`CPU utilization: ${rand(1,25)}%/1s, ${rand(1,20)}%/5s, ${rand(1,15)}%/1min`});
+    push(devId,{t:'lm',v:'PID  Runtime(ms)  Invoked  uSecs   5Sec  1Min  5Min  TTY Process'});
+    ['IP Input','ARP Input','OSPF Hello','BGP Task','CDP Protocol','Ethernet Tx','Net Background'].forEach((p,i)=>{
+      push(devId,{t:'lo',v:`${String(i+1).padEnd(5)}${rand(100,50000).toString().padEnd(13)}${rand(100,9999).toString().padEnd(9)}${rand(1,500).toString().padEnd(8)}${rand(0,5).toFixed(2).padEnd(6)}${rand(0,4).toFixed(2).padEnd(6)}${rand(0,3).toFixed(2).padEnd(6)}0  ${p}`});
+    });
+    return;
+  }
+
+  // ── show ip protocols ──
+  if(t==='ip protocols'){
+    push(devId,{t:'lt',v:`Routing protocols configured on ${d.hostname}:`});
+    if(d.routing.ospf.enabled){push(devId,{t:'lo',v:`  ○ OSPF — PID ${d.routing.ospf.pid}, Router-ID ${d.routing.ospf.rid||d.interfaces[0]?.ip||'—'}`});push(devId,{t:'lo',v:`    Redes: ${d.routing.ospf.networks.join(', ')||'—'}`});}
+    if(d.routing.eigrp.enabled){push(devId,{t:'lo',v:`  ◆ EIGRP — ASN ${d.routing.eigrp.asn}`});push(devId,{t:'lo',v:`    Redes: ${d.routing.eigrp.networks.join(', ')||'—'}`});}
+    if(d.routing.bgp.enabled){push(devId,{t:'lo',v:`  ● BGP — ASN ${d.routing.bgp.asn}`});push(devId,{t:'lo',v:`    Vecinos: ${d.routing.bgp.neighbors.map(n=>n.ip).join(', ')||'—'}`});}
+    if(d.routing.static.length){push(devId,{t:'lo',v:`  → Rutas estáticas: ${d.routing.static.length}`});}
+    if(!d.routing.ospf.enabled&&!d.routing.eigrp.enabled&&!d.routing.bgp.enabled&&!d.routing.static.length)push(devId,{t:'lm',v:'  Sin protocolos de enrutamiento activos.'});
+    return;
+  }
+
+  // ── show ip sockets / tcp ──
+  if(t==='ip sockets'||t==='tcp'||t.startsWith('tcp')){
+    push(devId,{t:'lt',v:'Proto  Rcv-Q Send-Q  Local Address    Foreign Address  State'});
+    [[22,'SSH'],[23,'TELNET'],[80,'HTTP'],[443,'HTTPS'],[179,'BGP']].forEach(([port,svc])=>{
+      if(Math.random()>0.4)push(devId,{t:'lo',v:`tcp    0     0       ${(d.interfaces[0]?.ip||'0.0.0.0')+':'+port}  0.0.0.0:*          LISTEN (${svc})`});
+    });
+    return;
+  }
+
+  // fallback
+  push(devId,{t:'le',v:`"show ${sub}" — comando no reconocido. Pruebe "show ?" para ver opciones.`});
+}
+
+// ─── HELP ──────────────────────────────────────────────
+function showHelp(devId,s){
+  const mode=s.mode;
+  const tables={
+    user:[
+      ['enable','Entrar a modo privilegiado'],['ping <ip>','Enviar pings ICMP'],
+      ['traceroute <ip>','Trazar ruta'],['show ...','Ver información del sistema'],
+      ['exit','Cerrar sesión'],
+    ],
+    priv:[
+      ['configure terminal','Entrar a modo config global'],['show ...','Ver información'],
+      ['ping <ip>','Ping'],['traceroute <ip>','Traceroute'],
+      ['debug ip ospf/eigrp/bgp/icmp/packet','Debug en tiempo real'],
+      ['clear ip ospf/eigrp/arp/counters','Limpiar tablas'],
+      ['write / copy run start','Guardar configuración'],
+      ['reload','Reiniciar dispositivo'],['clock set HH:MM:SS DD Mon YYYY','Ajustar reloj'],
+      ['disable','Volver a modo usuario'],
+    ],
+    config:[
+      ['hostname <name>','Cambiar nombre del dispositivo'],
+      ['interface <if>','Entrar a configurar interfaz (Gi0/0, Lo0, etc.)'],
+      ['ip route <dst> <mask> <nh>','Ruta estática'],
+      ['ip dhcp pool <name>','Crear pool DHCP'],
+      ['ip dhcp excluded-address <ip>','Excluir IP de DHCP'],
+      ['ip nat inside source ...','Configurar NAT'],
+      ['ip access-list extended <name>','Crear ACL extendida'],
+      ['router ospf <pid>','Entrar a OSPF'],
+      ['router eigrp <asn>','Entrar a EIGRP'],
+      ['router bgp <asn>','Entrar a BGP'],
+      ['spanning-tree mode <pvst|rapid-pvst|mst>','Modo STP'],
+      ['vlan <id>','Crear/editar VLAN'],
+      ['line vty 0 4','Configurar líneas VTY'],
+      ['enable secret <pass>','Contraseña enable'],
+      ['banner motd ^<texto>^','Banner MOTD'],
+      ['end','Volver a modo privilegiado'],
+    ],
+    iface:[
+      ['ip address <ip> <mask|/cidr>','Asignar IP a la interfaz'],
+      ['no shutdown','Habilitar interfaz'],['shutdown','Deshabilitar interfaz'],
+      ['description <texto>','Descripción'],['speed <10|100|1000>','Velocidad'],
+      ['duplex <full|half>','Duplex'],['ip nat <inside|outside>','Rol NAT'],
+      ['ip ospf cost <n>','Costo OSPF'],['ip helper-address <ip>','Helper DHCP'],
+      ['ipv6 address <addr/prefix>','Dirección IPv6'],
+      ['switchport mode <access|trunk>','Modo switchport'],
+      ['switchport access vlan <id>','VLAN de acceso'],
+      ['switchport trunk allowed vlan <list>','VLANs de trunk'],
+      ['channel-group <n> mode <active|on>','EtherChannel'],
+      ['standby <n> ip <ip>','HSRP'],['exit','Salir'],
+    ],
+    ospf:[
+      ['network <ip> <wildcard> area <n>','Anunciar red en OSPF'],
+      ['router-id <ip>','Router-ID'],['passive-interface <if>','Interfaz pasiva'],
+      ['default-information originate','Originar ruta por defecto'],
+      ['area <n> stub','Area stub'],['redistribute <proto> subnets','Redistribuir'],
+      ['neighbor <ip>','Vecino estático'],['log-adjacency-changes','Log cambios'],
+      ['exit / end','Salir'],
+    ],
+    eigrp:[
+      ['network <ip> [wildcard]','Anunciar red en EIGRP'],
+      ['no auto-summary','Desactivar auto-summary'],
+      ['passive-interface <if>','Interfaz pasiva'],
+      ['variance <n>','Variance para balanceo'],
+      ['redistribute <proto>','Redistribuir'],['exit','Salir'],
+    ],
+    bgp:[
+      ['neighbor <ip> remote-as <asn>','Declarar vecino BGP'],
+      ['neighbor <ip> update-source <if>','Update-source'],
+      ['neighbor <ip> next-hop-self','Next-hop-self'],
+      ['network <net> mask <mask>','Anunciar red'],
+      ['bgp router-id <ip>','Router-ID BGP'],
+      ['aggregate-address <net> <mask>','Agregación'],
+      ['redistribute <proto>','Redistribuir'],['exit','Salir'],
+    ],
+  };
+  const showCmds=[
+    'show ip int brief','show interfaces [<if>]','show ip route',
+    'show ip ospf','show ip ospf neighbor','show ip ospf database',
+    'show ip eigrp neighbor','show ip eigrp topology',
+    'show ip bgp','show ip bgp summary','show ip bgp neighbor',
+    'show arp','show vlan','show mac address-table',
+    'show version','show running-config','show startup-config',
+    'show cdp neighbors','show cdp neighbors detail',
+    'show ip dhcp pool','show ip dhcp binding',
+    'show spanning-tree','show ip nat translations',
+    'show ip protocols','show processes cpu',
+    'show users','show clock','show tcp brief',
+  ];
+  push(devId,{t:'lt',v:`════ COMANDOS — MODO: ${mode.toUpperCase()} ════════════════════════════════`});
+  const tbl=tables[mode]||tables['priv'];
+  tbl.forEach(([cmd,desc])=>push(devId,{t:'lo',v:`  ${cmd.padEnd(40)}${desc}`}));
+  if(mode==='priv'||mode==='config'){
+    push(devId,{t:'lt',v:'\n─── SHOW COMMANDS ─────────────────────'});
+    showCmds.forEach(c=>push(devId,{t:'lm',v:`  ${c}`}));
+  }
+  push(devId,{t:'lt',v:'════════════════════════════════════════════════════'});
+}
+
+// ═══════════════════════════════════════════════════════
+// PING SIMULATION
+// ═══════════════════════════════════════════════════════
+function simulatePing(devId,dev,target){
+  if(!target){push(devId,{t:'le',v:'Uso: ping <ip-destino>'});refreshCLI(devId);return;}
+  push(devId,{t:'li',v:`Enviando 5 paquetes ICMP a ${target}...`});
+  const targetDev=devices.find(d=>d.interfaces.some(i=>i.ip===target));
+  const reachable=checkReachable(dev,target);
+  if(targetDev&&reachable){spawnPackets(dev,targetDev,'#00ff9d');}
+  refreshCLI(devId);
+  let sent=0,recv=0;const times=[];
+  function step(){
+    if(sent>=5){
+      setTimeout(()=>{
+        const lost=5-recv;
+        push(devId,{t:'lm',v:''});
+        push(devId,{t:'lt',v:`─── Estadísticas: ${target} ───`});
+        push(devId,{t:recv>0?'lo':'le',v:`Enviados=5  Recibidos=${recv}  Perdidos=${lost} (${Math.round(lost/5*100)}% pérdida)`});
+        if(times.length){push(devId,{t:'lo',v:`RTT mín/prom/máx = ${Math.min(...times)}/${Math.round(times.reduce((a,b)=>a+b,0)/times.length)}/${Math.max(...times)} ms`});}
+        refreshCLI(devId);
+      },300);
+      return;
+    }
+    sent++;
+    setTimeout(()=>{
+      const ok=reachable&&Math.random()>0.05;
+      if(ok){const ms=calcLatency(dev,target);times.push(ms);recv++;push(devId,{t:'lo',v:`De ${target}: bytes=32 tiempo=${ms}ms TTL=${rand(50,128)} seq=${sent}`});}
+      else push(devId,{t:'le',v:`Tiempo de espera agotado (seq=${sent})`});
+      refreshCLI(devId);step();
+    },rand(300,800));
+  }
+  step();
+}
+
+// ═══════════════════════════════════════════════════════
+// TRACEROUTE SIMULATION
+// ═══════════════════════════════════════════════════════
+function simTraceroute(devId,dev,target){
+  if(!target){push(devId,{t:'le',v:'Uso: traceroute <ip>'});refreshCLI(devId);return;}
+  push(devId,{t:'li',v:`Trazando ruta a ${target}, máximo 30 saltos:`});
+  refreshCLI(devId);
+  const hops=buildHops(dev,target);
+  let h=0;
+  function step(){
+    if(h>=hops.length){push(devId,{t:'lt',v:'Traza completada.'});refreshCLI(devId);return;}
+    const hop=hops[h++];
+    setTimeout(()=>{
+      if(!sessions[devId])return;
+      if(hop.ok){
+        const t1=rand(1,hop.ms),t2=rand(1,hop.ms+5),t3=rand(1,hop.ms+3);
+        push(devId,{t:'lo',v:`  ${String(h).padStart(2)}  ${t1}ms  ${t2}ms  ${t3}ms  ${hop.ip}  [${hop.name}]`});
+      }else push(devId,{t:'lm',v:`  ${String(h).padStart(2)}  *        *        *     Solicitud agotada.`});
+      refreshCLI(devId);step();
+    },rand(200,700));
+  }
+  step();
+}
+
+function buildHops(src,targetIp){
+  const hops=[];
+  const gw=src.routing?.static.find(r=>r.dst==='0.0.0.0');
+  if(gw)hops.push({ip:gw.nh,name:'Gateway',ms:rand(1,4),ok:true});
+  const path=bfsPath(src.id,targetIp);
+  path.forEach(id=>{const d=byId(id);if(d){const i=d.interfaces.find(f=>f.ip&&f.status==='up');if(i)hops.push({ip:i.ip,name:d.name,ms:rand(2,30),ok:true});}});
+  const hasCloud=devices.some(d=>d.type==='cloud');
+  if(hasCloud&&!devices.find(d=>d.interfaces.some(i=>i.ip===targetIp))){
+    ['12.34.56.1','72.100.1.1','8.8.8.1'].slice(0,rand(2,3)).forEach((ip,i)=>hops.push({ip,name:'ISP-HOP-'+(i+1),ms:rand(8,120),ok:true}));
+  }
+  const reachable=checkReachable(src,targetIp);
+  hops.push({ip:targetIp,name:devices.find(d=>d.interfaces.some(i=>i.ip===targetIp))?.name||'Destino',ms:rand(5,200),ok:reachable});
+  return hops;
+}
+
+function bfsPath(fromId,targetIp){
+  const visited=new Set([fromId]),q=[[fromId,[]]];
+  while(q.length){
+    const[cur,path]=q.shift();
+    links.filter(l=>l.from===cur||l.to===cur).forEach(l=>{
+      const nid=l.from===cur?l.to:l.from;
+      if(visited.has(nid))return;visited.add(nid);
+      const n=byId(nid);const np=[...path,nid];
+      if(n&&n.interfaces.some(i=>i.ip===targetIp)){q.length=0;q.push([nid,np]);return;}
+      q.push([nid,np]);
+    });
+  }
+  return bfsPath2(fromId,targetIp);
+}
+function bfsPath2(fromId,targetIp){
+  const visited=new Set([fromId]),q=[[fromId,[]]];
+  while(q.length){
+    const[cur,path]=q.shift();
+    for(const l of links.filter(l=>l.from===cur||l.to===cur)){
+      const nid=l.from===cur?l.to:l.from;if(visited.has(nid))continue;visited.add(nid);
+      const n=byId(nid);const np=[...path,nid];
+      if(n&&n.interfaces.some(i=>i.ip===targetIp))return np;
+      q.push([nid,np]);
+    }
+  }
+  return[];
+}
+function checkReachable(src,target){
+  if(src.interfaces.some(i=>i.ip===target))return true;
+  const path=bfsPath2(src.id,target);
+  return path.length>0||Math.random()>0.25;
+}
+function calcLatency(src,target){
+  const path=bfsPath2(src.id,target);
+  return rand(1,5)+path.length*rand(2,18);
+}
+function spawnPackets(src,dst,color){
+  for(let i=0;i<5;i++){
+    setTimeout(()=>{
+      pkts.push({x0:src.x,y0:src.y,x1:dst.x,y1:dst.y,t:0,color});
+      setTimeout(()=>pkts.push({x0:dst.x,y0:dst.y,x1:src.x,y1:src.y,t:0,color:'#74b9ff'}),500);
+    },i*800);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// PUSH / REFRESH
+// ═══════════════════════════════════════════════════════
+function push(devId,line){const s=sessions[devId];if(!s)return;if(line)s.lines.push(line);}
+function pushLines(devId,lines){lines.forEach(l=>push(devId,l));refreshCLI(devId);}
+function refreshCLI(devId){
+  if(devId!==activeId)return;
+  const s=sessions[devId],d=byId(devId);if(!s||!d)return;
+  const out=document.getElementById('co-'+devId);
+  if(out){out.innerHTML=s.lines.map(renderLine).join('');out.scrollTop=out.scrollHeight;}
+  const cp=document.getElementById('cp');
+  if(cp)cp.textContent=prompt_str(d,s);
+}
+function unkCmd(devId,cmd){push(devId,{t:'le',v:`% Comando desconocido: "${cmd.split(' ')[0]}". Use ? o help.`});}
+
+// ═══════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function randMAC(){return Array(6).fill(0).map(()=>rand(0,255).toString(16).padStart(2,'0')).join(':');}
+function cidr2mask(c){const n=c<0?0:c>32?32:c;return n===0?'0.0.0.0':[(0xFFFFFFFF<<(32-n)>>>24)&255,((0xFFFFFFFF<<(32-n)>>>16)&255),((0xFFFFFFFF<<(32-n)>>>8)&255),(0xFFFFFFFF<<(32-n))&255].join('.');}
+function mask2cidr(mask){if(!mask)return 24;return mask.split('.').reduce((a,o)=>a+(parseInt(o).toString(2).match(/1/g)||[]).length,0);}
+function ipNet(ip,mask){const i=ip.split('.').map(Number),m=mask.split('.').map(Number);return i.map((o,j)=>(o&m[j])).join('.');}
+function fmtUptime(sec){const d=Math.floor(sec/86400),h=Math.floor((sec%86400)/3600),m=Math.floor((sec%3600)/60),s=sec%60;return`${d}d ${h}h ${m}m ${s}s`;}
+function md5fake(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=(h*0x01000193)>>>0;}return'$1$'+h.toString(16).padStart(8,'0')+'$'+((h*0xdeadbeef)>>>0).toString(16);}
+
+// ═══════════════════════════════════════════════════════
+// TEMPLATE
+// ═══════════════════════════════════════════════════════
+function loadTpl(){
+  if(devices.length&&!confirm('¿Cargar plantilla? Se borrará la topología actual.'))return;
+  devices=[];links=[];devCnt={};sessions={};activeId=null;renderTabs();
+  const cx=Math.round(W/2),cy=Math.round(H/2);
+  const tpl=[
+    {t:'cloud',   x:cx,     y:55,   n:'ISP',      ip:'200.1.1.1',   ci:30},
+    {t:'fw',      x:cx,     y:145,  n:'FW-01',    ip:'200.1.1.2',   ci:30},
+    {t:'router',  x:cx,     y:245,  n:'RT-CORE',  ip:'10.0.0.1',    ci:24},
+    {t:'switch',  x:cx-190, y:360,  n:'SW-DIST1', ip:'192.168.1.1', ci:24},
+    {t:'switch',  x:cx+190, y:360,  n:'SW-DIST2', ip:'192.168.2.1', ci:24},
+    {t:'pc',      x:cx-290, y:470,  n:'PC-01',    ip:'192.168.1.10',ci:24},
+    {t:'pc',      x:cx-170, y:470,  n:'PC-02',    ip:'192.168.1.11',ci:24},
+    {t:'server',  x:cx+100, y:470,  n:'SRV-WEB',  ip:'192.168.2.100',ci:24},
+    {t:'ap',      x:cx+220, y:470,  n:'AP-01',    ip:'192.168.2.2', ci:24},
+    {t:'phone',   x:cx+320, y:470,  n:'PHONE-01', ip:'192.168.2.51',ci:24},
+  ];
+  const gw_map={'200.1.1.2':'200.1.1.1','10.0.0.1':'200.1.1.2','192.168.1.1':'10.0.0.1','192.168.2.1':'10.0.0.1','192.168.1.10':'192.168.1.1','192.168.1.11':'192.168.1.1','192.168.2.100':'192.168.2.1','192.168.2.2':'192.168.2.1','192.168.2.51':'192.168.2.2'};
+  tpl.forEach(t=>{
+    const id='d'+Date.now()+Math.random().toString(36).slice(2,5);
+    t.id=id;
+    const d=makeDevice(t.t,t.x,t.y);
+    d.id=id;d.name=t.n;d.hostname=t.n;
+    d.interfaces[0].ip=t.ip;d.interfaces[0].cidr=t.ci;d.interfaces[0].mask=cidr2mask(t.ci);d.interfaces[0].status='up';
+    const gw=gw_map[t.ip];if(gw)d.routing.static.push({dst:'0.0.0.0',mask:'0.0.0.0',nh:gw,ad:1,iface:''});
+    t.devRef=d;devices.push(d);
+  });
+  [[0,1],[1,2],[2,3],[2,4],[3,5],[3,6],[4,7],[4,8],[8,9]].forEach(([a,b])=>{
+    links.push({from:tpl[a].devRef.id,to:tpl[b].devRef.id,fromIf:tpl[a].devRef.interfaces[0].name,toIf:tpl[b].devRef.interfaces[0].name,label:'',active:true,bw:'1Gbps'});
+  });
+  // Enable OSPF on routers
+  const rt=devices.find(d=>d.name==='RT-CORE');
+  if(rt){rt.routing.ospf.enabled=true;rt.routing.ospf.pid=1;rt.routing.ospf.rid='1.1.1.1';rt.routing.ospf.networks=['10.0.0.0/24','192.168.1.0/24','192.168.2.0/24'];}
+  statUpd();
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════
+function doExport(){
+  let svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" style="background:#020609">`;
+  svg+=`<defs><pattern id="g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,212,255,.03)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#g)"/>`;
+  links.forEach(l=>{const a=byId(l.from),b=byId(l.to);if(!a||!b)return;svg+=`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="rgba(0,212,255,.35)" stroke-width="1.5" stroke-dasharray="8,4"/>`;if(l.label)svg+=`<text x="${(a.x+b.x)/2}" y="${(a.y+b.y)/2-8}" text-anchor="middle" fill="#ff6b35" font-size="10" font-family="monospace">${l.label}</text>`;});
+  devices.forEach(d=>{const c=DC[d.type],r=c.r;svg+=`<circle cx="${d.x}" cy="${d.y}" r="${r}" fill="${c.color}18" stroke="${c.color}" stroke-width="1.5"/><text x="${d.x}" y="${d.y+5}" text-anchor="middle" font-size="${r*.85}" font-family="serif">${c.icon}</text><text x="${d.x}" y="${d.y+r+14}" text-anchor="middle" fill="${c.color}" font-size="10" font-family="monospace">${d.name}</text>`;const pi=d.interfaces.find(i=>i.ip);if(pi)svg+=`<text x="${d.x}" y="${d.y+r+26}" text-anchor="middle" fill="rgba(184,216,240,.6)" font-size="9" font-family="monospace">${pi.ip}/${pi.cidr}</text>`;});
+  svg+='</svg>';
+  const bl=new Blob([svg],{type:'image/svg+xml'});const url=URL.createObjectURL(bl);const a=document.createElement('a');a.href=url;a.download='topologia.svg';a.click();URL.revokeObjectURL(url);
+}
+
+function clearAll(){if(devices.length&&!confirm('¿Limpiar todo?'))return;devices=[];links=[];devCnt={};sessions={};activeId=null;renderTabs();statUpd();}
+function togglePanel(){document.getElementById('rp').classList.toggle('col');setTimeout(resize,300);}
+
+// Start
+requestAnimationFrame(draw);
+renderTabs();
+</script>
+</body>
+</html>
