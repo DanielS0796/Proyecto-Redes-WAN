@@ -171,3 +171,360 @@ netforge-suite/
 # Conclusión
 
 NETFORGE SUITE representa una integración práctica entre ingeniería de telecomunicaciones, desarrollo de software interactivo y asistencia inteligente para la construcción de entornos de simulación académica de alto valor profesional.
+
+
+
+
+# MANUAL TÉCNICO DE DESARROLLO  
+# NETFORGE PRO SIMULATOR
+
+## Fundación Universitaria Compensar  
+### Ingeniería en Telecomunicaciones  
+### Redes WAN  
+### Mayo de 2026
+
+---
+
+## Grupo Redes WAN
+
+- Daniel Felipe Guatibonza Suárez
+- Harrison David Rodríguez
+- Jhoan Sebastián Montañez
+
+---
+
+# 1. Introducción
+
+NetForge PRO Simulator es un entorno avanzado de simulación visual para modelado lógico de redes empresariales, diseñado para representar comportamientos estructurales presentes en plataformas profesionales de simulación de telecomunicaciones.
+
+Fue construido mediante iteraciones progresivas apoyadas por inteligencia artificial generativa, evolucionando desde un prototipo básico hasta una plataforma interactiva robusta.
+
+---
+
+# 2. Objetivo del desarrollo
+
+Construir una herramienta académica capaz de:
+
+- Simular topologías empresariales
+- Representar dispositivos WAN
+- Gestionar interfaces
+- Ejecutar comandos CLI simulados
+- Modelar routing dinámico
+- Visualizar tráfico lógico
+- Permitir aprendizaje práctico sin hardware físico
+
+---
+
+# 3. Metodología de construcción asistida por IA
+
+El sistema fue construido mediante prompts sucesivos de refinamiento.
+
+---
+
+# FASE 1  
+## Creación del prototipo base
+
+### Prompt aplicado
+
+```plaintext
+Crea un simulador HTML profesional de redes tipo Packet Tracer con interfaz oscura futurista, canvas interactivo y capacidad para agregar routers, switches y PCs.
+```
+
+### Resultado obtenido
+
+Se generó:
+
+- Canvas interactivo inicial
+- Inserción básica de nodos
+- Diseño visual tecnológico
+- Renderizado dinámico
+
+### Mejora funcional
+
+Permitió establecer una base gráfica modular.
+
+---
+
+# FASE 2  
+## Inclusión de modos operativos
+
+### Prompt aplicado
+
+```plaintext
+Agrega modos de operación para agregar, conectar, mover y eliminar dispositivos mediante botones superiores.
+```
+
+### Resultado obtenido
+
+Se añadieron:
+
+- Modo agregar
+- Modo conexión
+- Modo mover
+- Modo eliminar
+
+### Impacto técnico
+
+Transformó el prototipo en entorno manipulable.
+
+---
+
+# FASE 3  
+## Integración CLI profesional
+
+### Prompt aplicado
+
+```plaintext
+Añade un panel lateral tipo terminal Cisco IOS con múltiples sesiones concurrentes por dispositivo y simulación realista de consola.
+```
+
+### Resultado obtenido
+
+Se desarrolló:
+
+- Consola lateral
+- Tabs simultáneos
+- CLI interactiva
+- Simulación de comandos
+
+### Función práctica
+
+Permite entrenamiento conceptual en CLI.
+
+---
+
+# FASE 4  
+## Configuración avanzada de interfaces
+
+### Prompt aplicado
+
+```plaintext
+Agrega configuración editable para interfaces con IP, máscara, estado administrativo, velocidad, duplex y descripción.
+```
+
+### Resultado obtenido
+
+Se integró:
+
+- Popup de configuración
+- Estados up/down
+- Direccionamiento
+- Parámetros físicos simulados
+
+### Utilidad académica
+
+Refuerza comprensión de configuración real de interfaces.
+
+---
+
+# FASE 5  
+## Routing dinámico
+
+### Prompt aplicado
+
+```plaintext
+Implementa soporte visual y lógico para OSPF, EIGRP y BGP incluyendo vecinos, ASN y redes anunciadas.
+```
+
+### Resultado obtenido
+
+Se añadió:
+
+- Modelado lógico OSPF
+- Tablas EIGRP
+- Relaciones BGP
+- Estructura de vecinos
+
+### Aplicación
+
+Permite enseñanza conceptual de routing WAN.
+
+---
+
+# FASE 6  
+## Simulación de tráfico
+
+### Prompt aplicado
+
+```plaintext
+Haz que se visualicen paquetes animados recorriendo enlaces activos entre nodos.
+```
+
+### Resultado obtenido
+
+Se generó:
+
+- Partículas animadas
+- Movimiento interpolado
+- Feedback visual
+
+### Beneficio
+
+Facilita comprensión intuitiva del flujo de tráfico.
+
+---
+
+# FASE 7  
+## Exportación profesional
+
+### Prompt aplicado
+
+```plaintext
+Permite exportar la topología como SVG editable para documentación técnica.
+```
+
+### Resultado obtenido
+
+Exportación estructurada.
+
+Uso:
+
+- Evidencias académicas
+- Diagramación profesional
+- Presentaciones
+
+---
+
+# 4. Arquitectura técnica
+
+El sistema está dividido en módulos:
+
+## Render Engine
+
+Responsable del dibujo dinámico.
+
+Funciones:
+
+- Renderizado canvas
+- Refresco visual
+- Gestión gráfica
+
+---
+
+## Device Manager
+
+Administra:
+
+- creación
+- eliminación
+- estado
+- persistencia lógica
+
+---
+
+## CLI Engine
+
+Gestiona:
+
+- sesiones
+- parsing de comandos
+- respuestas simuladas
+
+---
+
+## Routing Engine
+
+Controla:
+
+- rutas
+- vecinos
+- anuncios
+- tablas
+
+---
+
+## Packet Animation Engine
+
+Simula:
+
+- tránsito
+- interpolación
+- actividad visual
+
+---
+
+# 5. Tecnologías utilizadas
+
+- HTML5
+- CSS3
+- JavaScript Vanilla
+- Canvas API
+- SVG API
+- Event Driven Architecture
+
+---
+
+# 6. Cómo recrearlo desde cero
+
+## Paso 1
+
+Crear:
+
+```plaintext
+index.html
+```
+
+---
+
+## Paso 2
+
+Solicitar generación base con Prompt Fase 1
+
+---
+
+## Paso 3
+
+Iterar secuencialmente usando prompts de mejora
+
+---
+
+## Paso 4
+
+Validar funcionamiento visual
+
+---
+
+## Paso 5
+
+Refinar lógica modular
+
+---
+
+## Paso 6
+
+Optimizar experiencia de usuario
+
+---
+
+# 7. Publicación en GitHub
+
+Crear repositorio:
+
+```bash
+git init
+git add .
+git commit -m "NetForge PRO"
+git branch -M main
+git remote add origin URL_REPO
+git push -u origin main
+```
+
+Activar GitHub Pages.
+
+---
+
+# 8. Aplicabilidad práctica
+
+Facilita la vida diaria al permitir:
+
+- práctica sin hardware costoso
+- formación remota
+- validación previa de topologías
+- reducción de errores de configuración
+- aprendizaje acelerado
+
+---
+
+# 9. Conclusión
+
+NetForge PRO demuestra cómo la inteligencia artificial puede potenciar el desarrollo académico serio cuando existe supervisión técnica humana rigurosa.
