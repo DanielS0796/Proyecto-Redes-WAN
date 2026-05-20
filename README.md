@@ -58,10 +58,10 @@ Simulador gráfico avanzado orientado al modelado visual de redes empresariales.
 <img width="576" height="906" alt="image" src="https://github.com/user-attachments/assets/fa222d8f-1e03-4fbb-8c42-25cf3370e18d" />
 
   
-- Routing dinámico
-- OSPF
-- EIGRP
-- BGP
+# Routing dinámico
+# OSPF
+# EIGRP
+# BGP
 
 <img width="577" height="905" alt="image" src="https://github.com/user-attachments/assets/44fffe66-5b3d-4ee7-ace1-28641560a20b" />
 
