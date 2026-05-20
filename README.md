@@ -104,13 +104,45 @@ Suite automatizada para cálculo y generación de configuraciones de red.
 ### Funcionalidades
 
 - Generación multi-vendor
+
+<img width="651" height="307" alt="image" src="https://github.com/user-attachments/assets/7731c77e-87b0-43ad-b820-d712f59db0cb" />
+
+  
 - Cálculo IPv4
+
+<img width="1513" height="686" alt="image" src="https://github.com/user-attachments/assets/624d9b45-b860-4418-b4a1-fe34726e9a53" />
+
+
+
 - Cálculo IPv6
+
+<img width="1391" height="664" alt="image" src="https://github.com/user-attachments/assets/b9e1edef-1a2d-434c-90dc-491ea24a19b4" />
+
+
 - División CIDR
+
+<img width="1516" height="498" alt="image" src="https://github.com/user-attachments/assets/261d0d51-8156-440d-b1b9-b21ec534d00c" />
+
+
 - Cálculo VLSM
+
+<img width="1499" height="486" alt="image" src="https://github.com/user-attachments/assets/ac9a63ab-02a6-468a-a498-b81537d9582a" />
+
+
 - Gestión VLAN
+
+<img width="1410" height="939" alt="image" src="https://github.com/user-attachments/assets/5b089807-0fa7-47b7-abca-c203e1ca2a76" />
+
+
 - Constructor de topologías
+
+<img width="1326" height="792" alt="image" src="https://github.com/user-attachments/assets/60d4ede7-7ee9-45b7-94ec-4c5200e0d35f" />
+
+
 - Exportación estructurada de comandos
+
+  <img width="1899" height="1024" alt="image" src="https://github.com/user-attachments/assets/3808a9fa-bc07-43f8-a0ce-30c9450168e6" />
+
 
 Compatible conceptualmente con:
 
