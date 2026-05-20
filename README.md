@@ -598,3 +598,20 @@ Facilita la vida diaria al permitir:
 # 9. Conclusión
 
 NetForge PRO demuestra cómo la inteligencia artificial puede potenciar el desarrollo académico serio cuando existe supervisión técnica humana rigurosa.
+
+
+# Acceso rápido
+
+## NetForge PRO
+
+- [Abrir herramienta](./netforge-pro/index.html)
+- [Manual técnico](./netforge-pro/MANUAL.md)
+- [Informe académico](./netforge-pro/INFORME.md)
+
+---
+
+## Network Configuration Suite
+
+- [Abrir herramienta](./network-suite/index.html)
+- [Manual técnico](./network-suite/MANUAL.md)
+- [Informe académico](./network-suite/INFORME.md)
